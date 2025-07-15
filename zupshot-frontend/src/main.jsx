@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Listings from './pages/Listings';
 import Profile from './pages/Profile';
 import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/listings" element={<Listings />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

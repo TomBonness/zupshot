@@ -11,6 +11,9 @@ export default function Home() {
         <Link to="/listings">
           <Button>Browse Listings</Button>
         </Link>
+        <Link to="/signup">
+          <Button>Sign Up</Button>
+        </Link>
         <Link to="/signin">
           <Button>Sign In</Button>
         </Link>
