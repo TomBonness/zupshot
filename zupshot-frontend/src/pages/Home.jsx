@@ -11,7 +11,9 @@ export default function Home() {
         <Link to="/listings">
           <Button>Browse Listings</Button>
         </Link>
-        <Button>Post Your Profile</Button>
+        <Link to="/signin">
+          <Button>Sign In</Button>
+        </Link>
       </div>
     </div>
   );

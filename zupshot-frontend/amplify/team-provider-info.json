@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-zupshot-dev-53541-authRole",
+      "UnauthRoleArn": "arn:aws:iam::488259283312:role/amplify-zupshot-dev-53541-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::488259283312:role/amplify-zupshot-dev-53541-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-zupshot-dev-53541-deployment",
+      "UnauthRoleName": "amplify-zupshot-dev-53541-unauthRole",
+      "StackName": "amplify-zupshot-dev-53541",
+      "StackId": "arn:aws:cloudformation:us-east-1:488259283312:stack/amplify-zupshot-dev-53541/c81cf280-619f-11f0-a2e8-0affe01ab649",
+      "AmplifyAppId": "d1ml28tab2mfs8"
+    },
+    "categories": {
+      "auth": {
+        "zupshotlogin": {}
+      }
+    }
+  }
+}
