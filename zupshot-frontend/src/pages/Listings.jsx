@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
 
 export default function Listings() {
@@ -29,20 +30,21 @@ export default function Listings() {
     },
   ];
 
-  return (
+return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <h1 className="text-3xl font-bold text-dark-gray mb-6">
         Browse Photographers
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {mockListings.map((listing, index) => (
-          <ListingCard
-            key={index}
-            name={listing.name}
-            location={listing.location}
-            price={listing.price}
-            imageUrl={listing.imageUrl}
-          />
+        {mockListings.map((listing) => (
+          <Link key={listing.id} to={`/profile/${listing.id}`}>
+            <ListingCard
+              name={listing.name}
+              location={listing.location}
+              price={listing.price}
+              imageUrl={listing.imageUrl}
+            />
+          </Link>
         ))}
       </div>
     </div>
