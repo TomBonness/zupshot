@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { Storage } from 'aws-amplify';
+import { uploadData, getUrl } from 'aws-amplify/storage';
 import ListingCard from '../components/ListingCard';
 import Button from '../components/Button';
 
@@ -16,6 +16,7 @@ export default function DashboardWithS3() {
   });
   const [formData, setFormData] = useState({ ...profile });
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,10 +25,12 @@ export default function DashboardWithS3() {
         setUser(currentUser);
       } catch (err) {
         console.error('Error fetching user:', err);
+        setError('Please sign in to access the dashboard');
+        navigate('/signin');
       }
     };
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -45,12 +48,16 @@ export default function DashboardWithS3() {
     }
 
     try {
-      const { key } = await Storage.put(`profiles/${user?.userId || 'temp'}/${file.name}`, file, {
-        contentType: file.type,
-      });
-      const imageUrl = await Storage.get(key);
-      setFormData({ ...formData, imageUrl });
+      const key = `private/${user?.userId || 'temp'}/${file.name}`; // Updated path
+      await uploadData({
+        path: key,
+        data: file,
+        options: { contentType: file.type },
+      }).result;
+      const { url } = await getUrl({ path: key });
+      setFormData({ ...formData, imageUrl: url.toString() });
     } catch (err) {
+      console.error('S3 upload error:', err);
       setError('Failed to upload image: ' + err.message);
     }
   };
@@ -58,13 +65,13 @@ export default function DashboardWithS3() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setProfile({ ...formData });
-    alert('Profile updated!'); // Replace with DynamoDB API call later
+    alert('Profile updated!');
   };
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete your profile?')) {
       setProfile(null);
-      alert('Profile deleted!'); // Replace with DynamoDB API call later
+      alert('Profile deleted!');
     }
   };
 

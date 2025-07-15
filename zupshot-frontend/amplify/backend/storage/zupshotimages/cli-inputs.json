@@ -1,0 +1,14 @@
+{
+  "resourceName": "zupshotimages",
+  "policyUUID": "75c42122",
+  "bucketName": "zupshotimagesbucket",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

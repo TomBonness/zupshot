@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Add useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import { signIn } from 'aws-amplify/auth';
 import Button from '../components/Button';
 
@@ -7,13 +7,17 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Add navigate hook
+  const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     try {
-      await signIn({ username: email, password });
-      navigate('/dashboard'); // Redirect to dashboard
+      const { isSignedIn } = await signIn({ username: email, password });
+      if (isSignedIn) {
+        navigate('/dashboard');
+      } else {
+        setError('Sign-in failed. Please verify your account.');
+      }
     } catch (err) {
       setError(err.message || 'Failed to sign in');
     }
