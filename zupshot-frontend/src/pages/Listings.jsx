@@ -42,7 +42,7 @@ export default function Listings() {
                 name={profile.name}
                 location={profile.location}
                 price={profile.price}
-                imageUrl={profile.imageUrl}
+                imageUrl={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'} // Use first image
                 id={profile.id}
               />
             </Link>
