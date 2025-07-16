@@ -8,6 +8,7 @@ import { listProfiles } from '../graphql/queries';
 import ListingCard from '../components/ListingCard';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
+import { useDropzone } from 'react-dropzone';
 
 const client = generateClient();
 
@@ -19,7 +20,7 @@ export default function DashboardWithS3() {
     location: '',
     price: '',
     description: '',
-    imageUrl: '',
+    imageUrls: [],
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function DashboardWithS3() {
             location: userProfile.location,
             price: userProfile.price,
             description: userProfile.description,
-            imageUrl: userProfile.imageUrl || '',
+            imageUrls: userProfile.imageUrls || [],
           });
         }
       } catch (err) {
@@ -68,33 +69,31 @@ export default function DashboardWithS3() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const validTypes = ['image/jpeg', 'image/png'];
-    if (!validTypes.includes(file.type)) {
-      setError('Please upload a JPEG or PNG image');
-      toast.error('Please upload a JPEG or PNG image');
-      return;
-    }
-
-    try {
-      const key = `private/${user?.userId || 'temp'}/${file.name}`;
-      await uploadData({
-        path: key,
-        data: file,
-        options: { contentType: file.type, accessLevel: 'private' },
-      }).result;
-      const { url } = await getUrl({ path: key, options: { accessLevel: 'private' } });
-      setFormData({ ...formData, imageUrl: url.toString() });
-      toast.success('Image uploaded successfully!');
-    } catch (err) {
-      console.error('S3 upload error:', err);
-      setError('Failed to upload image: ' + err.message);
-      toast.error('Failed to upload image');
-    }
-  };
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: { 'image/jpeg': [], 'image/png': [] },
+    multiple: true,
+    onDrop: async (acceptedFiles) => {
+      try {
+        const newUrls = [];
+        for (const file of acceptedFiles) {
+          const key = `private/${user?.userId || 'temp'}/${file.name}`;
+          await uploadData({
+            path: key,
+            data: file,
+            options: { contentType: file.type, accessLevel: 'private' },
+          }).result;
+          const { url } = await getUrl({ path: key, options: { accessLevel: 'private' } });
+          newUrls.push(url.toString());
+        }
+        setFormData({ ...formData, imageUrls: [...formData.imageUrls, ...newUrls] });
+        toast.success(`${newUrls.length} image(s) uploaded successfully!`);
+      } catch (err) {
+        console.error('S3 upload error:', err);
+        setError('Failed to upload images: ' + err.message);
+        toast.error('Failed to upload images');
+      }
+    },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,7 +108,7 @@ export default function DashboardWithS3() {
               location: formData.location,
               price: formData.price,
               description: formData.description,
-              imageUrl: formData.imageUrl,
+              imageUrls: formData.imageUrls,
             },
           },
           authMode: 'userPool',
@@ -124,7 +123,7 @@ export default function DashboardWithS3() {
               location: formData.location,
               price: formData.price,
               description: formData.description,
-              imageUrl: formData.imageUrl,
+              imageUrls: formData.imageUrls,
               owner: user.userId,
             },
           },
@@ -152,7 +151,7 @@ export default function DashboardWithS3() {
           });
         }
         setProfile(null);
-        setFormData({ name: '', location: '', price: '', description: '', imageUrl: '' });
+        setFormData({ name: '', location: '', price: '', description: '', imageUrls: [] });
         toast.success('Profile deleted successfully!');
       } catch (err) {
         console.error('Error deleting profile:', err);
@@ -175,12 +174,12 @@ export default function DashboardWithS3() {
         {profile ? (
           <div>
             <h2 className="text-xl font-semibold text-dark-gray mb-4">Profile Preview</h2>
-            <Link to={`/profile/${profile.id}`}> {/* Use profile.id */}
+            <Link to={`/profile/${profile.id}`}>
               <ListingCard
                 name={profile.name}
                 location={profile.location}
                 price={profile.price}
-                imageUrl={profile.imageUrl}
+                imageUrl={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'}
               />
             </Link>
           </div>
@@ -228,12 +227,17 @@ export default function DashboardWithS3() {
               rows="4"
               required
             />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full p-3 border border-light-gray rounded-lg"
-            />
+            <div {...getRootProps()} className="border border-dashed border-light-gray p-4 rounded-lg text-center cursor-pointer">
+              <input {...getInputProps()} />
+              <p className="text-sm text-dark-gray">Drag & drop images or click to upload (JPEG/PNG)</p>
+            </div>
+            {formData.imageUrls.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {formData.imageUrls.map((url, index) => (
+                  <img key={index} src={url} alt="Preview" className="w-full h-24 object-cover rounded-lg" />
+                ))}
+              </div>
+            )}
             <div className="flex gap-4">
               <Button type="submit">{profile ? 'Update Profile' : 'Create Profile'}</Button>
               {profile && (

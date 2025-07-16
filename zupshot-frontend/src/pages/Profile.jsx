@@ -7,6 +7,8 @@ import { createFeedback } from '../graphql/mutations';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
 import ContentLoader from 'react-content-loader';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 const client = generateClient();
 
@@ -148,11 +150,30 @@ export default function Profile() {
       <h1 className="text-3xl font-bold text-dark-gray mb-6">{profile.name}</h1>
       {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <img
-          src={profile.imageUrl || 'https://via.placeholder.com/128'}
-          alt={profile.name}
-          className="w-full h-64 object-cover rounded-lg transition-transform duration-300 hover:scale-105"
-        />
+        <Carousel
+          showArrows
+          showThumbs={false}
+          infiniteLoop
+          className="w-full"
+        >
+          {profile.imageUrls && profile.imageUrls.length > 0 ? (
+            profile.imageUrls.map((url, index) => (
+              <div key={index}>
+                <img
+                  src={url || 'https://via.placeholder.com/128'}
+                  alt={`${profile.name} ${index + 1}`}
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            ))
+          ) : (
+            <img
+              src="https://via.placeholder.com/128"
+              alt="Placeholder"
+              className="w-full h-64 object-cover rounded-lg"
+            />
+          )}
+        </Carousel>
         <div>
           <p className="text-dark-gray"><strong>Location:</strong> {profile.location}</p>
           <p className="text-dark-gray"><strong>Price:</strong> {profile.price}</p>

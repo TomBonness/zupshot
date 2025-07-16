@@ -9,7 +9,7 @@ export const onCreateProfile = /* GraphQL */ `
       location
       price
       description
-      imageUrl
+      imageUrls
       owner
       createdAt
       updatedAt
@@ -25,7 +25,7 @@ export const onUpdateProfile = /* GraphQL */ `
       location
       price
       description
-      imageUrl
+      imageUrls
       owner
       createdAt
       updatedAt
@@ -41,7 +41,7 @@ export const onDeleteProfile = /* GraphQL */ `
       location
       price
       description
-      imageUrl
+      imageUrls
       owner
       createdAt
       updatedAt

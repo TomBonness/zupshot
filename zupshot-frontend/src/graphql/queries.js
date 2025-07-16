@@ -9,7 +9,7 @@ export const getProfile = /* GraphQL */ `
       location
       price
       description
-      imageUrl
+      imageUrls
       owner
       createdAt
       updatedAt
@@ -30,7 +30,7 @@ export const listProfiles = /* GraphQL */ `
         location
         price
         description
-        imageUrl
+        imageUrls
         owner
         createdAt
         updatedAt
