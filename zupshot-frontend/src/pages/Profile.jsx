@@ -1,27 +1,75 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
-import { getProfile } from '../graphql/queries';
+import { getProfile, listFeedbacks } from '../graphql/queries';
+import { createFeedback } from '../graphql/mutations';
+import Button from '../components/Button';
+import toast from 'react-hot-toast';
 
 const client = generateClient();
 
 export default function Profile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState('');
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchUserAndData = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch (err) {
+        console.error('No user logged in:', err);
+      }
       try {
         const { data } = await client.graphql({ query: getProfile, variables: { id }, authMode: 'apiKey' });
         setProfile(data.getProfile);
+        const { data: feedbackData } = await client.graphql({ query: listFeedbacks, variables: { filter: { profileId: { eq: id } } }, authMode: 'apiKey' });
+        setFeedbacks(feedbackData.listFeedbacks.items);
       } catch (err) {
-        console.error('Error fetching profile:', err);
-        setError('Failed to load profile');
+        console.error('Error fetching data:', err);
+        setError('Failed to load profile or feedback');
       }
     };
-    fetchProfile();
+    fetchUserAndData();
   }, [id]);
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      setError('Please sign in to submit feedback');
+      navigate('/signin');
+      return;
+    }
+    if (rating < 1 || rating > 5) {
+      setError('Rating must be between 1 and 5');
+      return;
+    }
+    try {
+      await client.graphql({
+        query: createFeedback,
+        variables: {
+          input: { rating, comment, profileId: id, owner: user.userId },
+        },
+        authMode: 'userPool',
+      });
+      setRating(0);
+      setComment('');
+      const { data } = await client.graphql({ query: listFeedbacks, variables: { filter: { profileId: { eq: id } } }, authMode: 'apiKey' });
+      setFeedbacks(data.listFeedbacks.items);
+      toast.success('Feedback submitted successfully!');
+    } catch (err) {
+      console.error('Error submitting feedback:', err);
+      setError('Failed to submit feedback: ' + err.message);
+      toast.error('Failed to submit feedback');
+    }
+  };
 
   if (!profile) {
     return (
@@ -36,12 +84,55 @@ export default function Profile() {
       <h1 className="text-3xl font-bold text-dark-gray mb-6">{profile.name}</h1>
       {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <img src={profile.imageUrl || 'https://via.placeholder.com/128'} alt={profile.name} className="w-full h-64 object-cover rounded-lg" />
+        <img
+          src={profile.imageUrl || 'https://via.placeholder.com/128'}
+          alt={profile.name}
+          className="w-full h-64 object-cover rounded-lg transition-transform duration-300 hover:scale-105"
+        />
         <div>
           <p className="text-dark-gray"><strong>Location:</strong> {profile.location}</p>
           <p className="text-dark-gray"><strong>Price:</strong> {profile.price}</p>
           <p className="text-dark-gray mt-4">{profile.description}</p>
         </div>
+      </div>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>
+        {user ? (
+          <form onSubmit={handleFeedbackSubmit} className="grid grid-cols-1 gap-4 mb-6">
+            <input
+              type="number"
+              min="1"
+              max="5"
+              value={rating}
+              onChange={(e) => setRating(parseInt(e.target.value))}
+              placeholder="Rating (1-5)"
+              className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
+              required
+            />
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Your feedback..."
+              className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
+              rows="4"
+            />
+            <Button type="submit" className="transition-transform duration-200 hover:scale-105">
+              Submit Feedback
+            </Button>
+          </form>
+        ) : (
+          <p className="text-sm text-soft-red mb-4">Please sign in to submit feedback.</p>
+        )}
+        {feedbacks.length > 0 ? (
+          feedbacks.map((feedback) => (
+            <div key={feedback.id} className="border-t border-light-gray pt-4 mt-4">
+              <p className="text-dark-gray"><strong>Rating:</strong> {feedback.rating}/5</p>
+              <p className="text-dark-gray">{feedback.comment}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-dark-gray">No feedback yet.</p>
+        )}
       </div>
     </div>
   );

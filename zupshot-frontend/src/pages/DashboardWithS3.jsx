@@ -7,6 +7,7 @@ import { createProfile, updateProfile, deleteProfile } from '../graphql/mutation
 import { listProfiles } from '../graphql/queries';
 import ListingCard from '../components/ListingCard';
 import Button from '../components/Button';
+import toast from 'react-hot-toast';
 
 const client = generateClient();
 
@@ -27,12 +28,8 @@ export default function DashboardWithS3() {
     const fetchUserAndProfile = async () => {
       try {
         const currentUser = await getCurrentUser();
-        console.log('Current User:', currentUser);
-        const session = await fetchAuthSession();
-        console.log('Session:', session);
         setUser(currentUser);
         const response = await client.graphql({ query: listProfiles, variables: { filter: { owner: { eq: currentUser.userId } } }, authMode: 'apiKey' });
-        console.log('GraphQL Response:', response);
         const { data, errors } = response;
         if (errors) {
           console.log('GraphQL errors:', errors);
@@ -82,9 +79,11 @@ export default function DashboardWithS3() {
       }).result;
       const { url } = await getUrl({ path: key });
       setFormData({ ...formData, imageUrl: url.toString() });
+      toast.success('Image uploaded successfully!');
     } catch (err) {
       console.error('S3 upload error:', err);
       setError('Failed to upload image: ' + err.message);
+      toast.error('Failed to upload image');
     }
   };
 
@@ -106,6 +105,7 @@ export default function DashboardWithS3() {
           },
           authMode: 'userPool',
         });
+        toast.success('Profile updated successfully!');
       } else {
         await client.graphql({
           query: createProfile,
@@ -121,12 +121,13 @@ export default function DashboardWithS3() {
           },
           authMode: 'userPool',
         });
+        toast.success('Profile created successfully!');
       }
       setProfile({ ...formData, id: profile?.id });
-      alert('Profile saved!');
     } catch (err) {
       console.error('Error saving profile:', err);
       setError('Failed to save profile: ' + err.message);
+      toast.error('Failed to save profile');
     }
   };
 
@@ -142,10 +143,11 @@ export default function DashboardWithS3() {
         }
         setProfile(null);
         setFormData({ name: '', location: '', price: '', description: '', imageUrl: '' });
-        alert('Profile deleted!');
+        toast.success('Profile deleted successfully!');
       } catch (err) {
         console.error('Error deleting profile:', err);
         setError('Failed to delete profile: ' + err.message);
+        toast.error('Failed to delete profile');
       }
     }
   };
@@ -239,6 +241,6 @@ export default function DashboardWithS3() {
           </form>
         </div>
       </div>
-  </div>
+    </div>
   );
 }
