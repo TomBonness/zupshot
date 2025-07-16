@@ -12,7 +12,7 @@ export default function Listings() {
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const { data } = await client.graphql({ query: listProfiles });
+        const { data } = await client.graphql({ query: listProfiles, authMode: 'apiKey' });
         setProfiles(data.listProfiles.items);
       } catch (err) {
         console.error('Error fetching profiles:', err);

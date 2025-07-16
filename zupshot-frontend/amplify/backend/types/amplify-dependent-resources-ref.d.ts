@@ -2,11 +2,12 @@ export type AmplifyDependentResourcesAttributes = {
   "api": {
     "zupshot": {
       "GraphQLAPIEndpointOutput": "string",
-      "GraphQLAPIIdOutput": "string"
+      "GraphQLAPIIdOutput": "string",
+      "GraphQLAPIKeyOutput": "string"
     }
   },
   "auth": {
-    "zupshotAuthCategory": {
+    "ZupshotAuth": {
       "AppClientID": "string",
       "AppClientIDWeb": "string",
       "IdentityPoolId": "string",
@@ -17,7 +18,7 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "storage": {
-    "zupshotStorageCategory": {
+    "zupshotStorage": {
       "BucketName": "string",
       "Region": "string"
     }

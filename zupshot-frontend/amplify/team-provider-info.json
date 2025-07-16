@@ -1,25 +1,25 @@
 {
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-zupshot-dev-19bf5-authRole",
-      "UnauthRoleArn": "arn:aws:iam::488259283312:role/amplify-zupshot-dev-19bf5-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::488259283312:role/amplify-zupshot-dev-19bf5-authRole",
+      "AuthRoleName": "amplify-zupshot-dev-ae993-authRole",
+      "UnauthRoleArn": "arn:aws:iam::488259283312:role/amplify-zupshot-dev-ae993-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::488259283312:role/amplify-zupshot-dev-ae993-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-zupshot-dev-19bf5-deployment",
-      "UnauthRoleName": "amplify-zupshot-dev-19bf5-unauthRole",
-      "StackName": "amplify-zupshot-dev-19bf5",
-      "StackId": "arn:aws:cloudformation:us-east-1:488259283312:stack/amplify-zupshot-dev-19bf5/6581d9f0-61e1-11f0-824b-12951cea36cf",
-      "AmplifyAppId": "d3ewggdlwicyxo"
+      "DeploymentBucketName": "amplify-zupshot-dev-ae993-deployment",
+      "UnauthRoleName": "amplify-zupshot-dev-ae993-unauthRole",
+      "StackName": "amplify-zupshot-dev-ae993",
+      "StackId": "arn:aws:cloudformation:us-east-1:488259283312:stack/amplify-zupshot-dev-ae993/0aaf2390-6293-11f0-96b6-0affe394f0a9",
+      "AmplifyAppId": "d14rw2w504cbsv"
     },
     "categories": {
       "auth": {
-        "zupshotAuthCategory": {}
-      },
-      "storage": {
-        "zupshotStorageCategory": {}
+        "ZupshotAuth": {}
       },
       "api": {
         "zupshot": {}
+      },
+      "storage": {
+        "zupshotStorage": {}
       }
     }
   }

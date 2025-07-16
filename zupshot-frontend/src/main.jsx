@@ -1,6 +1,10 @@
 import { Amplify } from 'aws-amplify';
 import awsExports from './aws-exports';
-Amplify.configure(awsExports);
+Amplify.configure({
+  ...awsExports,
+  aws_appsync_apiKey: 'da2-e7rcg3hlendhvfbe63drj6yfxu',
+  aws_appsync_graphqlEndpoint: 'https://hdv3e45ocvflnazmmfzfhk7zdq.appsync-api.us-east-1.amazonaws.com/graphql',
+});
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

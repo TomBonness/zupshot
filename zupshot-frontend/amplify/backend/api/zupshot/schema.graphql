@@ -1,5 +1,8 @@
 type Profile @model 
-@auth(rules: [{ allow: owner, operations: [create, update, delete, read], identityClaim: "cognito:username" }]) {
+@auth(rules: [
+  { allow: public, operations: [read], provider: apiKey },
+  { allow: owner, operations: [create, update, delete], identityClaim: "sub" }
+]) {
   id: ID!
   name: String!
   location: String!

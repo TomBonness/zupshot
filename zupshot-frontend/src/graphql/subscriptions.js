@@ -2,11 +2,8 @@
 // this is an auto generated file. This will be overwritten
 
 export const onCreateProfile = /* GraphQL */ `
-  subscription OnCreateProfile(
-    $filter: ModelSubscriptionProfileFilterInput
-    $owner: String
-  ) {
-    onCreateProfile(filter: $filter, owner: $owner) {
+  subscription OnCreateProfile($filter: ModelSubscriptionProfileFilterInput) {
+    onCreateProfile(filter: $filter) {
       id
       name
       location
@@ -21,11 +18,8 @@ export const onCreateProfile = /* GraphQL */ `
   }
 `;
 export const onUpdateProfile = /* GraphQL */ `
-  subscription OnUpdateProfile(
-    $filter: ModelSubscriptionProfileFilterInput
-    $owner: String
-  ) {
-    onUpdateProfile(filter: $filter, owner: $owner) {
+  subscription OnUpdateProfile($filter: ModelSubscriptionProfileFilterInput) {
+    onUpdateProfile(filter: $filter) {
       id
       name
       location
@@ -40,11 +34,8 @@ export const onUpdateProfile = /* GraphQL */ `
   }
 `;
 export const onDeleteProfile = /* GraphQL */ `
-  subscription OnDeleteProfile(
-    $filter: ModelSubscriptionProfileFilterInput
-    $owner: String
-  ) {
-    onDeleteProfile(filter: $filter, owner: $owner) {
+  subscription OnDeleteProfile($filter: ModelSubscriptionProfileFilterInput) {
+    onDeleteProfile(filter: $filter) {
       id
       name
       location

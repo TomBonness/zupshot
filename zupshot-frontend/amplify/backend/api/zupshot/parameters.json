@@ -4,8 +4,12 @@
   "DynamoDBEnableServerSideEncryption": false,
   "AuthCognitoUserPoolId": {
     "Fn::GetAtt": [
-      "authzupshotAuthCategory",
+      "authZupshotAuth",
       "Outputs.UserPoolId"
     ]
-  }
+  },
+  "authType": "AMAZON_COGNITO_USER_POOLS",
+  "additionalAuthTypes": [
+    "API_KEY"
+  ]
 }

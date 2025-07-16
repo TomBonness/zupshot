@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "zupshotAuthCategory_identitypool_ca1b1b33",
+    "identityPoolName": "ZupshotAuth_identitypool_09b71d36",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "zupshoc7b63421",
-    "userPoolName": "zupshotUserPool",
+    "resourceNameTruncated": "zupsho76c467a9",
+    "userPoolName": "ZupshotUserPool",
     "autoVerifiedAttributes": [
       "email"
     ],
@@ -31,10 +31,10 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "zupshoc7b63421_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "Zupsho76c467a9_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "c7b63421",
-    "resourceName": "zupshotAuthCategory",
+    "sharedId": "76c467a9",
+    "resourceName": "ZupshotAuth",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
     "usernameAttributes": [

@@ -1,7 +1,7 @@
 {
-  "resourceName": "zupshotStorageCategory",
-  "policyUUID": "ef4bb40c",
-  "bucketName": "zupshotstorage",
+  "resourceName": "zupshotStorage",
+  "policyUUID": "4a845ba6",
+  "bucketName": "zupshotbucket",
   "storageAccess": "auth",
   "guestAccess": [],
   "authAccess": [

@@ -7,16 +7,25 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "zupshotAuthCategory"
+          "resourceName": "ZupshotAuth"
         }
       ],
       "output": {
         "authConfig": {
-          "additionalAuthenticationProviders": [],
+          "additionalAuthenticationProviders": [
+            {
+              "apiKeyConfig": {
+                "apiKeyExpirationDate": "2026-07-16T23:12:23.289Z",
+                "apiKeyExpirationDays": 365,
+                "description": "zupshotAPIkey"
+              },
+              "authenticationType": "API_KEY"
+            }
+          ],
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authzupshotAuthCategory"
+              "userPoolId": "authZupshotAuth"
             }
           }
         }
@@ -26,7 +35,7 @@
     }
   },
   "auth": {
-    "zupshotAuthCategory": {
+    "ZupshotAuth": {
       "customAuth": false,
       "dependsOn": [],
       "frontendAuthConfig": {
@@ -54,7 +63,7 @@
     }
   },
   "storage": {
-    "zupshotStorageCategory": {
+    "zupshotStorage": {
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "S3"

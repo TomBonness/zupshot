@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import { uploadData, getUrl } from 'aws-amplify/storage';
 import { generateClient } from 'aws-amplify/api';
 import { createProfile, updateProfile, deleteProfile } from '../graphql/mutations';
@@ -27,11 +27,18 @@ export default function DashboardWithS3() {
     const fetchUserAndProfile = async () => {
       try {
         const currentUser = await getCurrentUser();
+        console.log('Current User:', currentUser);
+        const session = await fetchAuthSession();
+        console.log('Session:', session);
         setUser(currentUser);
-        const { data } = await client.graphql({
-          query: listProfiles,
-          variables: { filter: { owner: { eq: currentUser.username } } },
-        });
+        const response = await client.graphql({ query: listProfiles, variables: { filter: { owner: { eq: currentUser.userId } } }, authMode: 'apiKey' });
+        console.log('GraphQL Response:', response);
+        const { data, errors } = response;
+        if (errors) {
+          console.log('GraphQL errors:', errors);
+          setError('Failed to fetch profile data');
+          return;
+        }
         const userProfile = data.listProfiles.items[0];
         if (userProfile) {
           setProfile(userProfile);
@@ -45,8 +52,7 @@ export default function DashboardWithS3() {
         }
       } catch (err) {
         console.error('Error fetching user or profile:', err);
-        setError('Please sign in to access the dashboard');
-        navigate('/signin');
+        setError('Authentication issue detected');
       }
     };
     fetchUserAndProfile();
@@ -98,6 +104,7 @@ export default function DashboardWithS3() {
               imageUrl: formData.imageUrl,
             },
           },
+          authMode: 'userPool',
         });
       } else {
         await client.graphql({
@@ -109,9 +116,10 @@ export default function DashboardWithS3() {
               price: formData.price,
               description: formData.description,
               imageUrl: formData.imageUrl,
-              owner: user.username,
+              owner: user.userId,
             },
           },
+          authMode: 'userPool',
         });
       }
       setProfile({ ...formData, id: profile?.id });
@@ -129,6 +137,7 @@ export default function DashboardWithS3() {
           await client.graphql({
             query: deleteProfile,
             variables: { input: { id: profile.id } },
+            authMode: 'userPool',
           });
         }
         setProfile(null);
@@ -230,6 +239,6 @@ export default function DashboardWithS3() {
           </form>
         </div>
       </div>
-    </div>
+  </div>
   );
 }
