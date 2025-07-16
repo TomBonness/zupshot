@@ -28,8 +28,16 @@ export default function DashboardWithS3() {
     const fetchUserAndProfile = async () => {
       try {
         const currentUser = await getCurrentUser();
+        console.log('Current User:', currentUser);
+        const session = await fetchAuthSession();
+        console.log('Session:', session);
         setUser(currentUser);
-        const response = await client.graphql({ query: listProfiles, variables: { filter: { owner: { eq: currentUser.userId } } }, authMode: 'apiKey' });
+        const response = await client.graphql({
+          query: listProfiles,
+          variables: { filter: { owner: { eq: currentUser.userId } } },
+          authMode: 'apiKey',
+        });
+        console.log('GraphQL Response:', response);
         const { data, errors } = response;
         if (errors) {
           console.log('GraphQL errors:', errors);
@@ -49,7 +57,7 @@ export default function DashboardWithS3() {
         }
       } catch (err) {
         console.error('Error fetching user or profile:', err);
-        setError('Authentication issue detected');
+        navigate('/signin'); // Redirect to sign-in
       }
     };
     fetchUserAndProfile();
@@ -67,6 +75,7 @@ export default function DashboardWithS3() {
     const validTypes = ['image/jpeg', 'image/png'];
     if (!validTypes.includes(file.type)) {
       setError('Please upload a JPEG or PNG image');
+      toast.error('Please upload a JPEG or PNG image');
       return;
     }
 
@@ -75,9 +84,9 @@ export default function DashboardWithS3() {
       await uploadData({
         path: key,
         data: file,
-        options: { contentType: file.type },
+        options: { contentType: file.type, accessLevel: 'private' },
       }).result;
-      const { url } = await getUrl({ path: key });
+      const { url } = await getUrl({ path: key, options: { accessLevel: 'private' } });
       setFormData({ ...formData, imageUrl: url.toString() });
       toast.success('Image uploaded successfully!');
     } catch (err) {
@@ -152,16 +161,15 @@ export default function DashboardWithS3() {
     }
   };
 
+  if (!user) {
+    return null; // Prevent rendering until redirect
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <h1 className="text-3xl font-bold text-dark-gray mb-6">Your Dashboard</h1>
-      {user ? (
-        <p className="text-sm text-dark-gray mb-4">Welcome, {user.username}!</p>
-      ) : (
-        <p className="text-sm text-soft-red mb-4">Please sign in to view your dashboard.</p>
-      )}
+      <p className="text-sm text-dark-gray mb-4">Welcome, {user.username}!</p>
       {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {profile ? (
           <div>
@@ -178,7 +186,6 @@ export default function DashboardWithS3() {
         ) : (
           <p className="text-sm text-dark-gray">No profile created yet.</p>
         )}
-
         <div>
           <h2 className="text-xl font-semibold text-dark-gray mb-4">
             {profile ? 'Edit Profile' : 'Create Profile'}
