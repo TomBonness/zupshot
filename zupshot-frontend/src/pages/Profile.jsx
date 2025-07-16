@@ -52,10 +52,39 @@ export default function Profile() {
       }
       try {
         setLoading(true);
-        const { data } = await client.graphql({ query: getProfile, variables: { id }, authMode: 'apiKey' });
-        setProfile(data.getProfile);
-        const { data: feedbackData } = await client.graphql({ query: listFeedbacks, variables: { filter: { profileId: { eq: id } } }, authMode: 'apiKey' });
-        setFeedbacks(feedbackData.listFeedbacks.items);
+        console.log('Fetching profile with ID:', id);
+        const response = await client.graphql({ 
+          query: getProfile, 
+          variables: { id }, 
+          authMode: 'apiKey' 
+        });
+        console.log('getProfile Response:', response);
+        if (response.errors) {
+          console.log('getProfile errors:', response.errors);
+          setError('Failed to load profile');
+          setLoading(false);
+          return;
+        }
+        if (!response.data.getProfile) {
+          console.log('Profile not found for ID:', id);
+          setError('Profile not found');
+          setLoading(false);
+          return;
+        }
+        setProfile(response.data.getProfile);
+        const feedbackResponse = await client.graphql({ 
+          query: listFeedbacks, 
+          variables: { filter: { profileId: { eq: id } } }, 
+          authMode: 'apiKey' 
+        });
+        console.log('listFeedbacks Response:', feedbackResponse);
+        if (feedbackResponse.errors) {
+          console.log('listFeedbacks errors:', feedbackResponse.errors);
+          setError('Failed to load feedback');
+          setLoading(false);
+          return;
+        }
+        setFeedbacks(feedbackResponse.data.listFeedbacks.items);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load profile or feedback');
@@ -75,6 +104,7 @@ export default function Profile() {
     }
     if (rating < 1 || rating > 5) {
       setError('Rating must be between 1 and 5');
+      toast.error('Rating must be between 1 and 5');
       return;
     }
     try {
@@ -87,7 +117,11 @@ export default function Profile() {
       });
       setRating(0);
       setComment('');
-      const { data } = await client.graphql({ query: listFeedbacks, variables: { filter: { profileId: { eq: id } } }, authMode: 'apiKey' });
+      const { data } = await client.graphql({ 
+        query: listFeedbacks, 
+        variables: { filter: { profileId: { eq: id } } }, 
+        authMode: 'apiKey' 
+      });
       setFeedbacks(data.listFeedbacks.items);
       toast.success('Feedback submitted successfully!');
     } catch (err) {
@@ -104,7 +138,7 @@ export default function Profile() {
   if (!profile) {
     return (
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <p className="text-sm text-soft-red">{error || 'Loading...'}</p>
+        <p className="text-sm text-soft-red">{error || 'Profile not found'}</p>
       </div>
     );
   }

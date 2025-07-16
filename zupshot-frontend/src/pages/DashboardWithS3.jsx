@@ -57,7 +57,7 @@ export default function DashboardWithS3() {
         }
       } catch (err) {
         console.error('Error fetching user or profile:', err);
-        navigate('/signin'); // Redirect to sign-in
+        navigate('/signin');
       }
     };
     fetchUserAndProfile();
@@ -116,7 +116,7 @@ export default function DashboardWithS3() {
         });
         toast.success('Profile updated successfully!');
       } else {
-        await client.graphql({
+        const response = await client.graphql({
           query: createProfile,
           variables: {
             input: {
@@ -130,9 +130,10 @@ export default function DashboardWithS3() {
           },
           authMode: 'userPool',
         });
+        console.log('Created Profile ID:', response.data.createProfile.id);
+        setProfile({ ...formData, id: response.data.createProfile.id });
         toast.success('Profile created successfully!');
       }
-      setProfile({ ...formData, id: profile?.id });
     } catch (err) {
       console.error('Error saving profile:', err);
       setError('Failed to save profile: ' + err.message);
@@ -162,7 +163,7 @@ export default function DashboardWithS3() {
   };
 
   if (!user) {
-    return null; // Prevent rendering until redirect
+    return null;
   }
 
   return (
@@ -174,7 +175,7 @@ export default function DashboardWithS3() {
         {profile ? (
           <div>
             <h2 className="text-xl font-semibold text-dark-gray mb-4">Profile Preview</h2>
-            <Link to={`/profile/${user?.userId || '1'}`}>
+            <Link to={`/profile/${profile.id}`}> {/* Use profile.id */}
               <ListingCard
                 name={profile.name}
                 location={profile.location}
