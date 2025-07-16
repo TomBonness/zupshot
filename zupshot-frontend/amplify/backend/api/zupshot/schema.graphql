@@ -9,6 +9,11 @@ type Profile @model
   price: String!
   description: String!
   imageUrls: [String]
+  portfolioImages: [String]
+  availability: String
+  pricingDetails: String
+  instagram: String
+  website: String
   owner: String
 }
 
@@ -30,7 +35,12 @@ input CreateProfileInput {
   location: String!
   price: String!
   description: String!
-  imageUrls: [String] # Match schema
+  imageUrls: [String]
+  portfolioImages: [String]
+  availability: String
+  pricingDetails: String
+  instagram: String
+  website: String
   owner: String
 }
 
@@ -40,6 +50,11 @@ input UpdateProfileInput {
   location: String
   price: String
   description: String
-  imageUrls: [String] # Match schema
+  imageUrls: [String]
+  portfolioImages: [String]
+  availability: String
+  pricingDetails: String
+  instagram: String
+  website: String
   owner: String
 }

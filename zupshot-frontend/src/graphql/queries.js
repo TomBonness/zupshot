@@ -10,6 +10,11 @@ export const getProfile = /* GraphQL */ `
       price
       description
       imageUrls
+      portfolioImages
+      availability
+      pricingDetails
+      instagram
+      website
       owner
       createdAt
       updatedAt
@@ -31,6 +36,11 @@ export const listProfiles = /* GraphQL */ `
         price
         description
         imageUrls
+        portfolioImages
+        availability
+        pricingDetails
+        instagram
+        website
         owner
         createdAt
         updatedAt

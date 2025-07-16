@@ -2,34 +2,34 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
-import { getProfile, listFeedbacks } from '../graphql/queries';
-import { createFeedback } from '../graphql/mutations';
-import Button from '../components/Button';
+import { getProfile, listFeedbacks } from '@/graphql/queries';
+import { createFeedback, deleteProfile } from '@/graphql/mutations';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import toast from 'react-hot-toast';
-import ContentLoader from 'react-content-loader';
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 const client = generateClient();
 
 const SkeletonProfile = () => (
-  <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <ContentLoader
-      speed={2}
-      width={700}
-      height={400}
-      viewBox="0 0 700 400"
-      backgroundColor="#F5F5F5"
-      foregroundColor="#E5E5E5"
-    >
-      <rect x="0" y="0" rx="4" ry="4" width="300" height="24" />
-      <rect x="0" y="48" rx="8" ry="8" width="320" height="192" />
-      <rect x="340" y="48" rx="4" ry="4" width="200" height="16" />
-      <rect x="340" y="76" rx="4" ry="4" width="150" height="16" />
-      <rect x="340" y="104" rx="4" ry="4" width="300" height="60" />
-      <rect x="0" y="280" rx="4" ry="4" width="300" height="24" />
-      <rect x="0" y="320" rx="4" ry="4" width="700" height="80" />
-    </ContentLoader>
+  <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+    <Skeleton className="h-12 w-64 bg-light-gray" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Skeleton className="w-full h-[300px] md:h-[500px] rounded-lg bg-light-gray" />
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48 bg-light-gray" />
+        <Skeleton className="h-6 w-32 bg-light-gray" />
+        <Skeleton className="h-6 w-40 bg-light-gray" />
+      </div>
+    </div>
+    <Skeleton className="w-full h-[200px] rounded-lg bg-light-gray" />
+    <Skeleton className="h-8 w-48 bg-light-gray" />
+    <Skeleton className="w-full h-24 bg-light-gray" />
   </div>
 );
 
@@ -42,9 +42,16 @@ export default function Profile() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!id) {
+      setError('Invalid profile ID');
+      setLoading(false);
+      return;
+    }
     const fetchUserAndData = async () => {
       try {
         const currentUser = await getCurrentUser();
@@ -95,7 +102,7 @@ export default function Profile() {
       }
     };
     fetchUserAndData();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
@@ -133,6 +140,27 @@ export default function Profile() {
     }
   };
 
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete your profile?')) {
+      try {
+        if (profile) {
+          await client.graphql({
+            query: deleteProfile,
+            variables: { input: { id: profile.id } },
+            authMode: 'userPool',
+          });
+        }
+        setProfile(null);
+        navigate('/dashboard');
+        toast.success('Profile deleted successfully!');
+      } catch (err) {
+        console.error('Error deleting profile:', err);
+        setError('Failed to delete profile: ' + err.message);
+        toast.error('Failed to delete profile');
+      }
+    }
+  };
+
   if (loading) {
     return <SkeletonProfile />;
   }
@@ -146,41 +174,162 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-bold text-dark-gray mb-6">{profile.name}</h1>
-      {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Carousel
-          showArrows
-          showThumbs={false}
-          infiniteLoop
-          className="w-full"
-        >
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <Carousel className="w-full">
+        <CarouselContent>
           {profile.imageUrls && profile.imageUrls.length > 0 ? (
             profile.imageUrls.map((url, index) => (
-              <div key={index}>
+              <CarouselItem key={index}>
                 <img
                   src={url || 'https://via.placeholder.com/128'}
                   alt={`${profile.name} ${index + 1}`}
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
+                  loading="lazy"
                 />
-              </div>
+              </CarouselItem>
             ))
           ) : (
-            <img
-              src="https://via.placeholder.com/128"
-              alt="Placeholder"
-              className="w-full h-64 object-cover rounded-lg"
-            />
+            <CarouselItem>
+              <img
+                src="https://via.placeholder.com/128"
+                alt="Placeholder"
+                className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
+                loading="lazy"
+              />
+            </CarouselItem>
           )}
-        </Carousel>
-        <div>
-          <p className="text-dark-gray"><strong>Location:</strong> {profile.location}</p>
-          <p className="text-dark-gray"><strong>Price:</strong> {profile.price}</p>
-          <p className="text-dark-gray mt-4">{profile.description}</p>
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+      <Card className="mt-6 bg-white shadow-sm">
+        <CardHeader className="flex flex-col md:flex-row items-center gap-4">
+          <Avatar className="w-32 h-32">
+            <AvatarImage src={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'} alt={profile.name} />
+            <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-3xl font-bold text-dark-gray">{profile.name}</h1>
+            <p className="text-lg text-light-gray">{profile.location}</p>
+            <p className="text-xl font-semibold text-soft-red">{profile.price || 'Free'}</p>
+          </div>
+        </CardHeader>
+      </Card>
+      <Accordion type="single" collapsible className="mt-6">
+        <AccordionItem value="about">
+          <AccordionTrigger className="text-xl font-semibold text-dark-gray">About Me</AccordionTrigger>
+          <AccordionContent className="prose text-dark-gray">{profile.description || 'Not specified'}</AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="availability">
+          <AccordionTrigger className="text-xl font-semibold text-dark-gray">Availability</AccordionTrigger>
+          <AccordionContent className="prose text-dark-gray">{profile.availability || 'Not specified'}</AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="pricing">
+          <AccordionTrigger className="text-xl font-semibold text-dark-gray">Pricing Details</AccordionTrigger>
+          <AccordionContent className="prose text-dark-gray">{profile.pricingDetails || 'Not specified'}</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      <div>
+        <h2 className="text-xl font-semibold text-dark-gray mb-4">Portfolio Gallery</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {profile.portfolioImages && profile.portfolioImages.length > 0 ? (
+            profile.portfolioImages.map((url, index) => (
+              <img
+                key={index}
+                src={url || 'https://via.placeholder.com/128'}
+                alt={`Portfolio ${index + 1}`}
+                className="w-full h-32 object-cover rounded-lg shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                onClick={() => {
+                  setSelectedImage(url);
+                  setDialogOpen(true);
+                }}
+                loading="lazy"
+              />
+            ))
+          ) : (
+            <p className="text-dark-gray">No portfolio images available.</p>
+          )}
         </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Portfolio Image</DialogTitle>
+            </DialogHeader>
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Selected Portfolio"
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-      <div className="mt-8">
+      <div className="flex gap-4">
+        {profile.instagram && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
+                  as="a"
+                  href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Instagram
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View on Instagram</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {profile.website && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
+                  as="a"
+                  href={profile.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Website
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Visit website</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        <Button
+          className="bg-olive-drab hover:bg-tan-yellow text-white hover:text-dark-gray"
+          as="a"
+          href={`mailto:${user?.username}?subject=Interested in a photoshoot via Zupshot`}
+        >
+          Contact Me
+        </Button>
+      </div>
+      {user && user.userId === profile.owner && (
+        <div className="flex gap-4">
+          <Button onClick={() => navigate('/dashboard')}>
+            Edit Profile
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+          >
+            Delete Profile
+          </Button>
+        </div>
+      )}
+      <div>
         <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>
         {user ? (
           <form onSubmit={handleFeedbackSubmit} className="grid grid-cols-1 gap-4 mb-6">

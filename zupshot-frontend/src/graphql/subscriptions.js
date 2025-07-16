@@ -10,6 +10,11 @@ export const onCreateProfile = /* GraphQL */ `
       price
       description
       imageUrls
+      portfolioImages
+      availability
+      pricingDetails
+      instagram
+      website
       owner
       createdAt
       updatedAt
@@ -26,6 +31,11 @@ export const onUpdateProfile = /* GraphQL */ `
       price
       description
       imageUrls
+      portfolioImages
+      availability
+      pricingDetails
+      instagram
+      website
       owner
       createdAt
       updatedAt
@@ -42,6 +52,11 @@ export const onDeleteProfile = /* GraphQL */ `
       price
       description
       imageUrls
+      portfolioImages
+      availability
+      pricingDetails
+      instagram
+      website
       owner
       createdAt
       updatedAt
