@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { generateClient } from 'aws-amplify/api';
 import { listProfiles } from '../graphql/queries';
 import ListingCard from '../components/ListingCard';
@@ -36,14 +37,15 @@ export default function Listings() {
           Array(6).fill().map((_, index) => <SkeletonCard key={index} />)
         ) : profiles.length > 0 ? (
           profiles.map((profile) => (
-            <ListingCard
-              key={profile.id}
-              name={profile.name}
-              location={profile.location}
-              price={profile.price}
-              imageUrl={profile.imageUrl}
-              id={profile.id}
-            />
+            <Link to={`/profile/${profile.id}`} key={profile.id}>
+              <ListingCard
+                name={profile.name}
+                location={profile.location}
+                price={profile.price}
+                imageUrl={profile.imageUrl}
+                id={profile.id}
+              />
+            </Link>
           ))
         ) : (
           <p className="text-dark-gray">No photographers found.</p>
