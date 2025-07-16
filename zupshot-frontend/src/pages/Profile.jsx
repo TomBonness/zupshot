@@ -6,8 +6,30 @@ import { getProfile, listFeedbacks } from '../graphql/queries';
 import { createFeedback } from '../graphql/mutations';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
+import ContentLoader from 'react-content-loader';
 
 const client = generateClient();
+
+const SkeletonProfile = () => (
+  <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <ContentLoader
+      speed={2}
+      width={700}
+      height={400}
+      viewBox="0 0 700 400"
+      backgroundColor="#F5F5F5"
+      foregroundColor="#E5E5E5"
+    >
+      <rect x="0" y="0" rx="4" ry="4" width="300" height="24" />
+      <rect x="0" y="48" rx="8" ry="8" width="320" height="192" />
+      <rect x="340" y="48" rx="4" ry="4" width="200" height="16" />
+      <rect x="340" y="76" rx="4" ry="4" width="150" height="16" />
+      <rect x="340" y="104" rx="4" ry="4" width="300" height="60" />
+      <rect x="0" y="280" rx="4" ry="4" width="300" height="24" />
+      <rect x="0" y="320" rx="4" ry="4" width="700" height="80" />
+    </ContentLoader>
+  </div>
+);
 
 export default function Profile() {
   const { id } = useParams();
@@ -17,6 +39,7 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +51,7 @@ export default function Profile() {
         console.error('No user logged in:', err);
       }
       try {
+        setLoading(true);
         const { data } = await client.graphql({ query: getProfile, variables: { id }, authMode: 'apiKey' });
         setProfile(data.getProfile);
         const { data: feedbackData } = await client.graphql({ query: listFeedbacks, variables: { filter: { profileId: { eq: id } } }, authMode: 'apiKey' });
@@ -35,6 +59,8 @@ export default function Profile() {
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load profile or feedback');
+      } finally {
+        setLoading(false);
       }
     };
     fetchUserAndData();
@@ -70,6 +96,10 @@ export default function Profile() {
       toast.error('Failed to submit feedback');
     }
   };
+
+  if (loading) {
+    return <SkeletonProfile />;
+  }
 
   if (!profile) {
     return (
