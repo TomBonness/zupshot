@@ -1,13 +1,13 @@
 {
   "api": {
-    "zupshotapi": {
+    "zupshot": {
       "dependsOn": [
         {
           "attributes": [
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "zupshotlogin"
+          "resourceName": "zupshotAuthCategory"
         }
       ],
       "output": {
@@ -16,7 +16,7 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authzupshotlogin"
+              "userPoolId": "authzupshotAuthCategory"
             }
           }
         }
@@ -26,7 +26,7 @@
     }
   },
   "auth": {
-    "zupshotlogin": {
+    "zupshotAuthCategory": {
       "customAuth": false,
       "dependsOn": [],
       "frontendAuthConfig": {
@@ -54,7 +54,7 @@
     }
   },
   "storage": {
-    "zupshotimages": {
+    "zupshotStorageCategory": {
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "S3"

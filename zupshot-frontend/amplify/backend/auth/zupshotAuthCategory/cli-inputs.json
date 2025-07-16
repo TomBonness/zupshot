@@ -1,9 +1,9 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "zupshotlogin_identitypool_eb9a6390",
+    "identityPoolName": "zupshotAuthCategory_identitypool_ca1b1b33",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "zupsho5fbdf640",
+    "resourceNameTruncated": "zupshoc7b63421",
     "userPoolName": "zupshotUserPool",
     "autoVerifiedAttributes": [
       "email"
@@ -31,12 +31,12 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "zupsho5fbdf640_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "zupshoc7b63421_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "5fbdf640",
-    "resourceName": "zupshotlogin",
+    "sharedId": "c7b63421",
+    "resourceName": "zupshotAuthCategory",
     "authSelections": "identityPoolAndUserPool",
-    "useDefault": "default",
+    "useDefault": "manual",
     "usernameAttributes": [
       "email"
     ],
@@ -61,11 +61,6 @@
       ]
     },
     "breakCircularDependency": true,
-    "dependsOn": [],
-    "authProviders": [],
-    "parentStack": {
-      "Ref": "AWS::StackId"
-    },
-    "permissions": []
+    "dependsOn": []
   }
 }

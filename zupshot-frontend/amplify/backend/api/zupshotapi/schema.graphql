@@ -1,9 +1,0 @@
-type Profile @model @auth(rules: [{ allow: owner, operations: [create, update, delete, read] }]) {
-  id: ID!
-  name: String!
-  location: String!
-  price: String!
-  description: String!
-  imageUrl: String
-  owner: String
-}

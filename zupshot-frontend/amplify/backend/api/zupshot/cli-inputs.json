@@ -1,11 +1,11 @@
 {
   "version": 1,
   "serviceConfiguration": {
-    "apiName": "zupshotapi",
+    "apiName": "zupshot",
     "serviceName": "AppSync",
     "defaultAuthType": {
       "mode": "AMAZON_COGNITO_USER_POOLS",
-      "cognitoUserPoolId": "authzupshotlogin"
+      "cognitoUserPoolId": "authzupshotAuthCategory"
     }
   }
 }
