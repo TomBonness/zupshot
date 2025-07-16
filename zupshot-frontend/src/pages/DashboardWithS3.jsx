@@ -2,34 +2,54 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { uploadData, getUrl } from 'aws-amplify/storage';
+import { generateClient } from 'aws-amplify/api';
+import { createProfile, updateProfile, deleteProfile } from '../graphql/mutations';
+import { listProfiles } from '../graphql/queries';
 import ListingCard from '../components/ListingCard';
 import Button from '../components/Button';
 
+const client = generateClient();
+
 export default function DashboardWithS3() {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState({
-    name: 'John Doe',
-    location: 'New York, NY',
-    price: 'Free',
-    description: 'Passionate beginner photographer...',
-    imageUrl: 'https://via.placeholder.com/128',
+  const [profile, setProfile] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    price: '',
+    description: '',
+    imageUrl: '',
   });
-  const [formData, setFormData] = useState({ ...profile });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndProfile = async () => {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        const { data } = await client.graphql({
+          query: listProfiles,
+          variables: { filter: { owner: { eq: currentUser.username } } },
+        });
+        const userProfile = data.listProfiles.items[0];
+        if (userProfile) {
+          setProfile(userProfile);
+          setFormData({
+            name: userProfile.name,
+            location: userProfile.location,
+            price: userProfile.price,
+            description: userProfile.description,
+            imageUrl: userProfile.imageUrl || '',
+          });
+        }
       } catch (err) {
-        console.error('Error fetching user:', err);
+        console.error('Error fetching user or profile:', err);
         setError('Please sign in to access the dashboard');
         navigate('/signin');
       }
     };
-    fetchUser();
+    fetchUserAndProfile();
   }, [navigate]);
 
   const handleInputChange = (e) => {
@@ -48,7 +68,7 @@ export default function DashboardWithS3() {
     }
 
     try {
-      const key = `private/${user?.userId || 'temp'}/${file.name}`; // Updated path
+      const key = `private/${user?.userId || 'temp'}/${file.name}`;
       await uploadData({
         path: key,
         data: file,
@@ -62,16 +82,62 @@ export default function DashboardWithS3() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setProfile({ ...formData });
-    alert('Profile updated!');
+    try {
+      if (profile) {
+        await client.graphql({
+          query: updateProfile,
+          variables: {
+            input: {
+              id: profile.id,
+              name: formData.name,
+              location: formData.location,
+              price: formData.price,
+              description: formData.description,
+              imageUrl: formData.imageUrl,
+            },
+          },
+        });
+      } else {
+        await client.graphql({
+          query: createProfile,
+          variables: {
+            input: {
+              name: formData.name,
+              location: formData.location,
+              price: formData.price,
+              description: formData.description,
+              imageUrl: formData.imageUrl,
+              owner: user.username,
+            },
+          },
+        });
+      }
+      setProfile({ ...formData, id: profile?.id });
+      alert('Profile saved!');
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      setError('Failed to save profile: ' + err.message);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete your profile?')) {
-      setProfile(null);
-      alert('Profile deleted!');
+      try {
+        if (profile) {
+          await client.graphql({
+            query: deleteProfile,
+            variables: { input: { id: profile.id } },
+          });
+        }
+        setProfile(null);
+        setFormData({ name: '', location: '', price: '', description: '', imageUrl: '' });
+        alert('Profile deleted!');
+      } catch (err) {
+        console.error('Error deleting profile:', err);
+        setError('Failed to delete profile: ' + err.message);
+      }
     }
   };
 

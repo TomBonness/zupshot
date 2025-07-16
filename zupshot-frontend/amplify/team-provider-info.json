@@ -17,6 +17,9 @@
       },
       "storage": {
         "zupshotimages": {}
+      },
+      "api": {
+        "zupshotapi": {}
       }
     }
   }

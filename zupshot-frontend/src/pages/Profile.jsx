@@ -1,57 +1,51 @@
-import { Link } from 'react-router-dom';
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import Button from '../components/Button';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { generateClient } from 'aws-amplify/api';
+import { getProfile } from '../graphql/queries';
+
+const client = generateClient();
 
 export default function Profile() {
-  // Mock data for testing (replace with API data later)
-  const mockProfile = {
-    name: 'John Doe',
-    location: 'New York, NY',
-    price: 'Free',
-    description:
-      'Passionate beginner photographer specializing in candid portraits and urban landscapes. Available for casual shoots to build my portfolio!',
-    images: [
-      'https://www.anthropics.com/portraitpro/img/page-images/homepage/v22/what-can-it-do-2A.jpg',
-      'https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?cs=srgb&dl=pexels-olly-762020.jpg&fm=jpg',
-      'https://cdn.mos.cms.futurecdn.net/5rw4iYEgEBxupC6WRffpTF.png',
-    ],
-  };
+  const { id } = useParams();
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data } = await client.graphql({ query: getProfile, variables: { id } });
+        setProfile(data.getProfile);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError('Failed to load profile');
+      }
+    };
+    fetchProfile();
+  }, [id]);
+
+  if (!profile) {
+    return (
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <p className="text-sm text-soft-red">{error || 'Loading...'}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Hero Image Carousel */}
-      <Carousel
-        showThumbs={false}
-        showStatus={false}
-        infiniteLoop
-        autoPlay
-        interval={5000}
-        className="mb-6"
-      >
-        {mockProfile.images.map((image, index) => (
-          <div key={index}>
-            <img
-              src={image}
-              alt={`Portfolio ${index + 1}`}
-              className="w-full h-[300px] sm:h-[400px] object-cover rounded-lg"
-              loading="lazy"
-            />
-          </div>
-        ))}
-      </Carousel>
-
-      {/* Profile Details */}
-      <div className="grid grid-cols-1 gap-4">
-        <h1 className="text-3xl font-bold text-dark-gray">{mockProfile.name}</h1>
-        <p className="text-sm text-dark-gray">{mockProfile.location}</p>
-        <p className="text-sm font-medium text-soft-red">
-          {mockProfile.price || 'Free'}
-        </p>
-        <p className="text-base text-dark-gray">{mockProfile.description}</p>
-        <Link to="mailto:example@email.com">
-          <Button>Contact</Button>
-        </Link>
+      <h1 className="text-3xl font-bold text-dark-gray mb-6">{profile.name}</h1>
+      {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <img
+          src={profile.imageUrl || 'https://via.placeholder.com/128'}
+          alt={profile.name}
+          className="w-full h-64 object-cover rounded-lg"
+        />
+        <div>
+          <p className="text-dark-gray"><strong>Location:</strong> {profile.location}</p>
+          <p className="text-dark-gray"><strong>Price:</strong> {profile.price}</p>
+          <p className="text-dark-gray mt-4">{profile.description}</p>
+        </div>
       </div>
     </div>
   );
