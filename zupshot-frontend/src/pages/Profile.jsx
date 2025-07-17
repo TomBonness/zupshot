@@ -7,7 +7,6 @@ import { createFeedback, deleteProfile } from '@/graphql/mutations';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -18,19 +17,21 @@ import Header from '@/components/Header';
 const client = generateClient();
 
 const SkeletonProfile = () => (
-  <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-    <Skeleton className="h-12 w-64 bg-light-gray" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Skeleton className="w-full h-[300px] md:h-[500px] rounded-lg bg-light-gray" />
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48 bg-light-gray" />
-        <Skeleton className="h-6 w-32 bg-light-gray" />
-        <Skeleton className="h-6 w-40 bg-light-gray" />
+  <div className="min-h-screen bg-light-gray">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <Skeleton className="h-12 w-64 bg-white" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Skeleton className="w-full h-[300px] md:h-[500px] rounded-lg bg-white" />
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48 bg-white" />
+          <Skeleton className="h-6 w-32 bg-white" />
+          <Skeleton className="h-6 w-40 bg-white" />
+        </div>
       </div>
+      <Skeleton className="w-full h-[200px] rounded-lg bg-white" />
+      <Skeleton className="h-8 w-48 bg-white" />
+      <Skeleton className="w-full h-24 bg-white" />
     </div>
-    <Skeleton className="w-full h-[200px] rounded-lg bg-light-gray" />
-    <Skeleton className="h-8 w-48 bg-light-gray" />
-    <Skeleton className="w-full h-24 bg-light-gray" />
   </div>
 );
 
@@ -58,7 +59,7 @@ export default function Profile() {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
       } catch (err) {
-        console.error('No user logged in:', err);
+        console.log('No user logged in:', err);
       }
       try {
         setLoading(true);
@@ -168,208 +169,238 @@ export default function Profile() {
 
   if (!profile) {
     return (
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <Header />
-        <p className="text-sm text-soft-red">{error || 'Profile not found'}</p>
+      <div className="min-h-screen bg-light-gray">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+          <Header />
+          <p className="text-sm text-soft-red">{error || 'Profile not found'}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-      <Header />
-      <Carousel className="w-full">
-        <CarouselContent>
-          {profile.imageUrls && profile.imageUrls.length > 0 ? (
-            profile.imageUrls.map((url, index) => (
-              <CarouselItem key={index}>
+    <div className="min-h-screen bg-light-gray">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+        <Header />
+        <Carousel className="w-full">
+          <CarouselContent>
+            {profile.imageUrls && profile.imageUrls.length > 0 ? (
+              profile.imageUrls.map((url, index) => (
+                <CarouselItem key={index}>
+                  <img
+                    src={url || 'https://via.placeholder.com/128'}
+                    alt={`${profile.name} ${index + 1}`}
+                    className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
+                    loading="lazy"
+                  />
+                </CarouselItem>
+              ))
+            ) : (
+              <CarouselItem>
                 <img
-                  src={url || 'https://via.placeholder.com/128'}
-                  alt={`${profile.name} ${index + 1}`}
+                  src="https://via.placeholder.com/128"
+                  alt="Placeholder"
                   className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
                   loading="lazy"
                 />
               </CarouselItem>
-            ))
-          ) : (
-            <CarouselItem>
-              <img
-                src="https://via.placeholder.com/128"
-                alt="Placeholder"
-                className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
-                loading="lazy"
-              />
-            </CarouselItem>
-          )}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-      <Card className="mt-6 bg-white shadow-sm">
-        <CardHeader className="flex flex-col md:flex-row items-center gap-4">
-          <Avatar className="w-32 h-32">
-            <AvatarImage src={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'} alt={profile.name} />
-            <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-3xl font-bold text-dark-gray">{profile.name}</h1>
-            <p className="text-lg text-light-gray">{profile.location}</p>
-            <p className="text-xl font-semibold text-soft-red">{profile.price || 'Free'}</p>
-          </div>
-        </CardHeader>
-      </Card>
-      <Accordion type="single" collapsible className="mt-6">
-        <AccordionItem value="about">
-          <AccordionTrigger className="text-xl font-semibold text-dark-gray">About Me</AccordionTrigger>
-          <AccordionContent className="prose text-dark-gray">{profile.description || 'Not specified'}</AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="availability">
-          <AccordionTrigger className="text-xl font-semibold text-dark-gray">Availability</AccordionTrigger>
-          <AccordionContent className="prose text-dark-gray">{profile.availability || 'Not specified'}</AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="pricing">
-          <AccordionTrigger className="text-xl font-semibold text-dark-gray">Pricing Details</AccordionTrigger>
-          <AccordionContent className="prose text-dark-gray">{profile.pricingDetails || 'Not specified'}</AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      <div>
-        <h2 className="text-xl font-semibold text-dark-gray mb-4">Portfolio Gallery</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {profile.portfolioImages && profile.portfolioImages.length > 0 ? (
-            profile.portfolioImages.map((url, index) => (
-              <img
-                key={index}
-                src={url || 'https://via.placeholder.com/128'}
-                alt={`Portfolio ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg shadow-sm hover:scale-105 transition-transform cursor-pointer"
-                onClick={() => {
-                  setSelectedImage(url);
-                  setDialogOpen(true);
-                }}
-                loading="lazy"
-              />
-            ))
-          ) : (
-            <p className="text-dark-gray">No portfolio images available.</p>
-          )}
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Portfolio Image</DialogTitle>
-            </DialogHeader>
-            {selectedImage && (
-              <img
-                src={selectedImage}
-                alt="Selected Portfolio"
-                className="w-full h-auto max-h-[80vh] object-contain"
-              />
             )}
-          </DialogContent>
-        </Dialog>
-      </div>
-      <div className="flex gap-4">
-        {profile.instagram && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
-                  as="a"
-                  href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-col md:flex-row items-center gap-4">
+            <Avatar className="w-32 h-32">
+              <AvatarImage src={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'} alt={profile.name} />
+              <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-3xl font-bold text-dark-gray">{profile.name}</h1>
+              <p className="text-lg text-dark-gray">{profile.location}</p>
+              <p className="text-xl font-semibold text-soft-red">{profile.price || 'Free'}</p>
+            </div>
+          </CardHeader>
+        </Card>
+        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-dark-gray">About Me</h2>
+          </CardHeader>
+          <CardContent className="prose text-dark-gray">
+            {profile.description || 'Not specified'}
+          </CardContent>
+        </Card>
+        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-dark-gray">Availability</h2>
+          </CardHeader>
+          <CardContent className="prose text-dark-gray">
+            {profile.availability || 'Not specified'}
+          </CardContent>
+        </Card>
+        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-dark-gray">Pricing Details</h2>
+          </CardHeader>
+          <CardContent className="prose text-dark-gray">
+            {profile.pricingDetails || 'Not specified'}
+          </CardContent>
+        </Card>
+        <div>
+          <h2 className="text-xl font-semibold text-dark-gray mb-4">Portfolio Gallery</h2>
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+            {profile.portfolioImages && profile.portfolioImages.length > 0 ? (
+              profile.portfolioImages.map((url, index) => (
+                <div
+                  key={index}
+                  className={`break-inside-avoid ${index % 2 === 0 ? 'mt-0' : 'mt-8'} cursor-pointer`}
+                  onClick={() => {
+                    setSelectedImage(url);
+                    setDialogOpen(true);
+                  }}
                 >
-                  Instagram
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>View on Instagram</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        {profile.website && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
-                  as="a"
-                  href={profile.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Website
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Visit website</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        <Button
-          className="bg-olive-drab hover:bg-tan-yellow text-white hover:text-dark-gray"
-          as="a"
-          href={`mailto:${user?.username}?subject=Interested in a photoshoot via Zupshot`}
-        >
-          Contact Me
-        </Button>
-      </div>
-      {user && user.userId === profile.owner && (
+                  <img
+                    src={url || 'https://via.placeholder.com/128'}
+                    alt={`Portfolio ${index + 1}`}
+                    className="w-full h-auto object-cover rounded-lg shadow-sm"
+                    loading="lazy"
+                  />
+                </div>
+              ))
+            ) : (
+              <p className="text-dark-gray">No portfolio images available.</p>
+            )}
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Portfolio Image</DialogTitle>
+              </DialogHeader>
+              {selectedImage && (
+                <img
+                  src={selectedImage}
+                  alt="Selected Portfolio"
+                  className="w-full h-auto max-h-[80vh] object-contain"
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="flex gap-4">
-          <Button onClick={() => navigate('/dashboard')}>
-            Edit Profile
-          </Button>
+          {profile.instagram && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-olive-drab text-olive-drab hover:bg-tan-yellow hover:text-dark-gray"
+                    asChild
+                  >
+                    <a
+                      href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Instagram
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View on Instagram</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {profile.website && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-olive-drab text-olive-drab hover:bg-tan-yellow hover:text-dark-gray"
+                    asChild
+                  >
+                    <a
+                      href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Website
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Visit website</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <Button
-            variant="destructive"
-            onClick={handleDelete}
+            className="bg-olive-drab hover:bg-tan-yellow text-white hover:text-dark-gray"
+            asChild
           >
-            Delete Profile
+            <a
+              href={`mailto:${profile.email || 'contact@zupshot.com'}?subject=Interested in a photoshoot via Zupshot`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Contact Me
+            </a>
           </Button>
         </div>
-      )}
-      <div>
-        <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>
-        {user ? (
-          <form onSubmit={handleFeedbackSubmit} className="grid grid-cols-1 gap-4 mb-6">
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={rating}
-              onChange={(e) => setRating(parseInt(e.target.value))}
-              placeholder="Rating (1-5)"
-              className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
-              required
-            />
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Your feedback..."
-              className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
-              rows="4"
-            />
-            <Button type="submit" className="transition-transform duration-200 hover:scale-105">
-              Submit Feedback
+        {user && user.userId === profile.owner && (
+          <div className="flex gap-4">
+            <Button onClick={() => navigate('/dashboard')}>
+              Edit Profile
             </Button>
-          </form>
-        ) : (
-          <p className="text-sm text-soft-red mb-4">Please sign in to submit feedback.</p>
+            <Button
+              variant="destructive"
+              className="hover:bg-soft-red hover:text-white"
+              onClick={handleDelete}
+            >
+              Delete Profile
+            </Button>
+          </div>
         )}
-        {feedbacks.length > 0 ? (
-          feedbacks.map((feedback) => (
-            <div key={feedback.id} className="border-t border-light-gray pt-4 mt-4">
-              <p className="text-dark-gray"><strong>Rating:</strong> {feedback.rating}/5</p>
-              <p className="text-dark-gray">{feedback.comment}</p>
-            </div>
-          ))
-        ) : (
-          <p className="text-dark-gray">No feedback yet.</p>
-        )}
+        <div>
+          <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>
+          {user ? (
+            <form onSubmit={handleFeedbackSubmit} className="grid grid-cols-1 gap-4 mb-6">
+              <input
+                type="number"
+                min="1"
+                max="5"
+                value={rating}
+                onChange={(e) => setRating(parseInt(e.target.value))}
+                placeholder="Rating (1-5)"
+                className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
+                required
+              />
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Your feedback..."
+                className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
+                rows="4"
+              />
+              <Button type="submit" className="transition-transform duration-200 hover:scale-105">
+                Submit Feedback
+              </Button>
+            </form>
+          ) : (
+            <p className="text-sm text-soft-red mb-4">Please sign in to submit feedback.</p>
+          )}
+          {feedbacks.length > 0 ? (
+            feedbacks.map((feedback) => (
+              <div key={feedback.id} className="border-t border-light-gray pt-4 mt-4">
+                <p className="text-dark-gray"><strong>Rating:</strong> {feedback.rating}/5</p>
+                <p className="text-dark-gray">{feedback.comment}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-dark-gray">No feedback yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );
