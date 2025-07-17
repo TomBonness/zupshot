@@ -6,10 +6,11 @@ import { generateClient } from 'aws-amplify/api';
 import { createProfile, updateProfile, deleteProfile } from '@/graphql/mutations';
 import { listProfiles } from '@/graphql/queries';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import ListingCard from '@/components/ListingCard';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import toast from 'react-hot-toast';
 import { useDropzone } from 'react-dropzone';
 import Header from '@/components/Header';
@@ -200,124 +201,192 @@ export default function DashboardWithS3() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      <Header />
-      <h1 className="text-3xl font-bold text-dark-gray mb-6">Your Dashboard</h1>
-      <p className="text-sm text-dark-gray mb-4">Welcome, {user.username}!</p>
-      {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {profile ? (
-          <div>
-            <h2 className="text-xl font-semibold text-dark-gray mb-4">Profile Preview</h2>
-            <Link to={`/profile/${profile.id}`}>
-              <ListingCard
-                name={profile.name}
-                location={profile.location}
-                price={profile.price}
-                imageUrl={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'}
-              />
-            </Link>
-          </div>
-        ) : (
-          <p className="text-sm text-dark-gray">No profile created yet.</p>
-        )}
-        <div>
-          <h2 className="text-xl font-semibold text-dark-gray mb-4">
-            {profile ? 'Edit Profile' : 'Create Profile'}
-          </h2>
-          <Card>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-                <Input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Name"
-                  className="border-light-gray focus:ring-olive-drab"
-                  required
-                />
-                <Input
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="Location"
-                  className="border-light-gray focus:ring-olive-drab"
-                  required
-                />
-                <Input
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="Price (e.g., Free, $50)"
-                  className="border-light-gray focus:ring-olive-drab"
-                  required
-                />
-                <Textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe your photography services..."
-                  className="border-light-gray focus:ring-olive-drab"
-                  rows="4"
-                  required
-                />
-                <div {...getMainProps()} className="border border-dashed border-light-gray p-4 rounded-lg text-center cursor-pointer">
-                  <input {...getMainInputProps()} />
-                  <p className="text-sm text-dark-gray">Drag & drop main images (up to 5, JPEG/PNG)</p>
-                </div>
-                {formData.imageUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {formData.imageUrls.map((url, index) => (
-                      <img key={index} src={url} alt="Main Preview" className="w-full h-24 object-cover rounded-lg" />
-                    ))}
+    <div className="min-h-screen bg-light-gray">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <Header />
+        <h1 className="text-3xl font-bold text-dark-gray mb-4 text-center">Your Dashboard</h1>
+        <p className="text-lg text-dark-gray mb-6 text-center">Welcome, {user.username}!</p>
+        {error && <p className="text-sm text-soft-red mb-4 text-center">{error}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {profile ? (
+            <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-tan-yellow">Profile Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to={`/profile/${profile.id}`}>
+                  <img
+                    src={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'}
+                    alt={profile.name}
+                    className="w-full h-48 object-cover rounded-lg mb-4 hover:scale-105 transition-transform"
+                    loading="lazy"
+                  />
+                  <div className="flex items-center gap-4">
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'} alt={profile.name} />
+                      <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="text-lg font-semibold text-tan-yellow">{profile.name}</h3>
+                      <p className="text-sm text-dark-gray">{profile.location}</p>
+                      <p className="text-sm font-medium text-dark-gray">{profile.price || 'Free'}</p>
+                    </div>
                   </div>
-                )}
-                <div {...getPortfolioProps()} className="border border-dashed border-light-gray p-4 rounded-lg text-center cursor-pointer">
-                  <input {...getPortfolioInputProps()} />
-                  <p className="text-sm text-dark-gray">Drag & drop portfolio images (up to 6, JPEG/PNG)</p>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="bg-white shadow-md">
+              <CardContent className="p-4 text-center">
+                <p className="text-sm text-dark-gray">No profile created yet. Fill out the form to get started!</p>
+              </CardContent>
+            </Card>
+          )}
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-dark-gray">
+                {profile ? 'Edit Your Profile' : 'Create Your Profile'}
+              </CardTitle>
+              <p className="text-sm text-dark-gray">Build your photographer profile to connect with clients.</p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="text-dark-gray font-medium">Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Your name"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    required
+                  />
                 </div>
-                {formData.portfolioImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {formData.portfolioImages.map((url, index) => (
-                      <img key={index} src={url} alt="Portfolio Preview" className="w-full h-24 object-cover rounded-lg" />
-                    ))}
+                <div className="grid gap-2">
+                  <Label htmlFor="location" className="text-dark-gray font-medium">Location</Label>
+                  <Input
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    placeholder="City, State"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="price" className="text-dark-gray font-medium">Price</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    placeholder="Price (e.g., Free, $50)"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description" className="text-dark-gray font-medium">Description</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe your photography services..."
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    rows="4"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-dark-gray font-medium">Main Images (Hero Carousel)</Label>
+                  <p className="text-sm text-dark-gray">Upload up to 5 images to display in the hero carousel at the top of your profile page.</p>
+                  <div {...getMainProps()} className="border border-dashed border-light-gray p-4 rounded-lg text-center cursor-pointer hover:bg-tan-yellow/20 transition-colors">
+                    <input {...getMainInputProps()} />
+                    <p className="text-sm text-dark-gray">Drag & drop or click to upload main images (JPEG/PNG)</p>
                   </div>
-                )}
-                <Textarea
-                  name="availability"
-                  value={formData.availability}
-                  onChange={handleInputChange}
-                  placeholder="Availability (e.g., Weekends only, evenings after 5pm)"
-                  className="border-light-gray focus:ring-olive-drab"
-                  rows="4"
-                />
-                <Textarea
-                  name="pricingDetails"
-                  value={formData.pricingDetails}
-                  onChange={handleInputChange}
-                  placeholder="Pricing Details (e.g., Basic shoot: $50, Edits included: +$20)"
-                  className="border-light-gray focus:ring-olive-drab"
-                  rows="4"
-                />
-                <Input
-                  name="instagram"
-                  value={formData.instagram}
-                  onChange={handleInputChange}
-                  placeholder="Instagram Handle (e.g., @photographer)"
-                  className="border-light-gray focus:ring-olive-drab"
-                />
-                <Input
-                  name="website"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                  placeholder="Website (optional)"
-                  className="border-light-gray focus:ring-olive-drab"
-                />
-                <div className="flex gap-4">
-                  <Button type="submit">{profile ? 'Update Profile' : 'Create Profile'}</Button>
+                  {formData.imageUrls.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.imageUrls.map((url, index) => (
+                        <img key={index} src={url} alt="Main Preview" className="w-full h-24 object-cover rounded-lg shadow-sm hover:scale-105 transition-transform" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-dark-gray font-medium">Portfolio Images (Gallery)</Label>
+                  <p className="text-sm text-dark-gray">Upload up to 6 images for the portfolio gallery section of your profile page.</p>
+                  <div {...getPortfolioProps()} className="border border-dashed border-light-gray p-4 rounded-lg text-center cursor-pointer hover:bg-tan-yellow/20 transition-colors">
+                    <input {...getPortfolioInputProps()} />
+                    <p className="text-sm text-dark-gray">Drag & drop or click to upload portfolio images (JPEG/PNG)</p>
+                  </div>
+                  {formData.portfolioImages.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.portfolioImages.map((url, index) => (
+                        <img key={index} src={url} alt="Portfolio Preview" className="w-full h-24 object-cover rounded-lg shadow-sm hover:scale-105 transition-transform" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="availability" className="text-dark-gray font-medium">Availability</Label>
+                  <Textarea
+                    id="availability"
+                    name="availability"
+                    value={formData.availability}
+                    onChange={handleInputChange}
+                    placeholder="Availability (e.g., Weekends only, evenings after 5pm)"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    rows="4"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="pricingDetails" className="text-dark-gray font-medium">Pricing Details</Label>
+                  <Textarea
+                    id="pricingDetails"
+                    name="pricingDetails"
+                    value={formData.pricingDetails}
+                    onChange={handleInputChange}
+                    placeholder="Pricing Details (e.g., Basic shoot: $50, Edits included: +$20)"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    rows="4"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="instagram" className="text-dark-gray font-medium">Instagram Handle</Label>
+                  <Input
+                    id="instagram"
+                    name="instagram"
+                    value={formData.instagram}
+                    onChange={handleInputChange}
+                    placeholder="Instagram Handle (e.g., @photographer)"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="website" className="text-dark-gray font-medium">Website (optional)</Label>
+                  <Input
+                    id="website"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleInputChange}
+                    placeholder="Website"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                  />
+                </div>
+                <div className="flex gap-4 justify-center">
+                  <Button 
+                    type="submit" 
+                    className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray transition-transform hover:scale-105 rounded-lg"
+                  >
+                    {profile ? 'Update Profile' : 'Create Profile'}
+                  </Button>
                   {profile && (
                     <Button
                       variant="destructive"
+                      className="hover:bg-soft-red hover:text-white transition-transform hover:scale-105 rounded-lg"
                       onClick={handleDelete}
                     >
                       Delete Profile
