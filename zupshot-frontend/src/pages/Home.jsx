@@ -1,26 +1,211 @@
-import { Link } from 'react-router-dom';
-import Button from '../components/Button';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { getCurrentUser } from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
+import { listProfiles } from '@/graphql/queries';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Skeleton } from '@/components/ui/skeleton';
+import toast from 'react-hot-toast';
+
+const client = generateClient();
+
 export default function Home() {
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserAndProfiles = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch (err) {
+        console.error('No user logged in:', err);
+      }
+      try {
+        setLoading(true);
+        const response = await client.graphql({
+          query: listProfiles,
+          variables: { limit: 4 }, // Fetch top 4 profiles
+          authMode: 'apiKey',
+        });
+        console.log('GraphQL Response:', response);
+        if (response.errors) {
+          console.log('GraphQL errors:', response.errors);
+          setError('Failed to load featured photographers');
+          return;
+        }
+        setProfiles(response.data.listProfiles.items);
+      } catch (err) {
+        console.error('Error fetching profiles:', err);
+        setError('Failed to load featured photographers');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserAndProfiles();
+  }, []);
+
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <h1 className="text-4xl font-bold text-dark-gray">Find Beginner Photographers Near You</h1>
-      <p className="text-lg text-dark-gray my-4">
-        Build a portfolio or get photos done without breaking the bank.
-      </p>
-      <div className="flex gap-4">
-        <Link to="/listings">
-          <Button>Browse Listings</Button>
-        </Link>
-        <Link to="/signup">
-          <Button>Sign Up</Button>
-        </Link>
-        <Link to="/signin">
-          <Button>Sign In</Button>
-        </Link>
-        <Link to="/dashboard">
-          <Button>Dashboard</Button>
-        </Link>
-      </div>
+    <div className="max-w-7xl mx-auto p-4 md:p-6">
+      {/* Header */}
+      <header className="flex justify-between items-center py-4">
+        <h1 className="text-2xl font-bold text-olive-drab">Zupshot</h1>
+        <div className="flex gap-4">
+          <Button
+            variant="outline"
+            className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
+            asChild
+          >
+            <Link to="/listings">Browse Listings</Link>
+          </Button>
+          <Button
+            className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
+            onClick={() => navigate(user ? '/dashboard' : '/signup')}
+          >
+            Post Your Profile
+          </Button>
+          {!user && (
+            <>
+              <Button
+                variant="outline"
+                className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
+                asChild
+              >
+                <Link to="/signin">Sign In</Link>
+              </Button>
+              <Button
+                className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
+                asChild
+              >
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="flex flex-col items-center justify-center text-center bg-light-gray rounded-lg p-8 mt-8 animate-fade-in">
+        <h1 className="text-4xl md:text-6xl font-bold text-dark-gray mb-4">
+          Find Beginner Photographers Near You
+        </h1>
+        <p className="text-xl text-dark-gray mb-6 max-w-2xl">
+          Build a portfolio or get photos done without breaking the bank. Connect with aspiring photographers for affordable, fun shoots.
+        </p>
+        <div className="flex gap-4">
+          <Button
+            className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray px-6 py-3"
+            asChild
+          >
+            <Link to="/listings">Browse Listings</Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="border-olive-drab text-olive-drab hover:bg-tan-yellow px-6 py-3"
+            onClick={() => navigate(user ? '/dashboard' : '/signup')}
+          >
+            Post Your Profile
+          </Button>
+        </div>
+      </section>
+
+      {/* Featured Listings */}
+      <section className="mt-12">
+        <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center">Featured Photographers</h2>
+        {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {loading ? (
+            Array(4).fill().map((_, index) => (
+              <Skeleton key={index} className="w-full h-64 rounded-lg bg-light-gray" />
+            ))
+          ) : profiles.length > 0 ? (
+            profiles.map((listing) => (
+              <Card key={listing.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <Link to={`/profile/${listing.id}`}>
+                    <img
+                      src={listing.imageUrls?.[0] || 'https://via.placeholder.com/128'}
+                      alt={listing.name}
+                      className="w-full h-48 object-cover rounded-lg mb-4 hover:scale-105 transition-transform"
+                      loading="lazy"
+                    />
+                    <h3 className="text-xl font-semibold text-dark-gray">{listing.name}</h3>
+                    <p className="text-sm text-light-gray">{listing.location}</p>
+                    <p className="text-sm font-medium text-soft-red">{listing.price || 'Free'}</p>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-dark-gray text-center col-span-full">No photographers found.</p>
+          )}
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="mt-12">
+        <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center">How It Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-xl font-semibold text-dark-gray">1. Browse</h3>
+              <p className="text-dark-gray">Discover local beginner photographers.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-xl font-semibold text-dark-gray">2. View Profiles</h3>
+              <p className="text-dark-gray">Explore portfolios and pricing details.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-xl font-semibold text-dark-gray">3. Contact</h3>
+              <p className="text-dark-gray">Reach out to book a shoot.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      <section className="mt-12">
+        <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center">What Users Say</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardContent className="p-4">
+              <p className="italic text-dark-gray">"Zupshot made it easy to find affordable photos!"</p>
+              <p className="text-right text-light-gray">- Jane D.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="italic text-dark-gray">"A great way to build my photography portfolio!"</p>
+              <p className="text-right text-light-gray">- Alex P.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="italic text-dark-gray">"Fun and professional photographers!"</p>
+              <p className="text-right text-light-gray">- Sarah M.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="mt-12 py-6 bg-dark-gray text-center text-light-gray">
+        <div className="flex justify-center gap-4 mb-4">
+          <Link to="/about" className="hover:text-olive-drab">About</Link>
+          <Link to="/terms" className="hover:text-olive-drab">Terms</Link>
+          <Link to="/privacy" className="hover:text-olive-drab">Privacy</Link>
+        </div>
+        <p>© 2025 Zupshot</p>
+      </footer>
     </div>
   );
 }
