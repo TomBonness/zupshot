@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ListingCard from '@/components/ListingCard';
 import toast from 'react-hot-toast';
 import { useDropzone } from 'react-dropzone';
+import Header from '@/components/Header';
 
 const client = generateClient();
 
@@ -200,6 +201,7 @@ export default function DashboardWithS3() {
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <Header />
       <h1 className="text-3xl font-bold text-dark-gray mb-6">Your Dashboard</h1>
       <p className="text-sm text-dark-gray mb-4">Welcome, {user.username}!</p>
       {error && <p className="text-sm text-soft-red mb-4">{error}</p>}

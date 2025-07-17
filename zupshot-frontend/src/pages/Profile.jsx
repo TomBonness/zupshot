@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import toast from 'react-hot-toast';
+import Header from '@/components/Header';
 
 const client = generateClient();
 
@@ -168,6 +169,7 @@ export default function Profile() {
   if (!profile) {
     return (
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <Header />
         <p className="text-sm text-soft-red">{error || 'Profile not found'}</p>
       </div>
     );
@@ -175,6 +177,7 @@ export default function Profile() {
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <Header />
       <Carousel className="w-full">
         <CarouselContent>
           {profile.imageUrls && profile.imageUrls.length > 0 ? (

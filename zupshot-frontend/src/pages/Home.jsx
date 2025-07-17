@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 import toast from 'react-hot-toast';
+import Header from '@/components/Header';
 
 const client = generateClient();
 
@@ -30,7 +31,7 @@ export default function Home() {
         setLoading(true);
         const response = await client.graphql({
           query: listProfiles,
-          variables: { limit: 4 }, // Fetch top 4 profiles
+          variables: { limit: 4 },
           authMode: 'apiKey',
         });
         console.log('GraphQL Response:', response);
@@ -52,44 +53,7 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
-      {/* Header */}
-      <header className="flex justify-between items-center py-4">
-        <h1 className="text-2xl font-bold text-olive-drab">Zupshot</h1>
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
-            asChild
-          >
-            <Link to="/listings">Browse Listings</Link>
-          </Button>
-          <Button
-            className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
-            onClick={() => navigate(user ? '/dashboard' : '/signup')}
-          >
-            Post Your Profile
-          </Button>
-          {!user && (
-            <>
-              <Button
-                variant="outline"
-                className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
-                asChild
-              >
-                <Link to="/signin">Sign In</Link>
-              </Button>
-              <Button
-                className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
-                asChild
-              >
-                <Link to="/signup">Sign Up</Link>
-              </Button>
-            </>
-          )}
-        </div>
-      </header>
-
-      {/* Hero Section */}
+      <Header />
       <section className="flex flex-col items-center justify-center text-center bg-light-gray rounded-lg p-8 mt-8 animate-fade-in">
         <h1 className="text-4xl md:text-6xl font-bold text-dark-gray mb-4">
           Find Beginner Photographers Near You
@@ -113,8 +77,6 @@ export default function Home() {
           </Button>
         </div>
       </section>
-
-      {/* Featured Listings */}
       <section className="mt-12">
         <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center">Featured Photographers</h2>
         {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
@@ -146,8 +108,6 @@ export default function Home() {
           )}
         </div>
       </section>
-
-      {/* How It Works */}
       <section className="mt-12">
         <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center">How It Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -171,8 +131,6 @@ export default function Home() {
           </Card>
         </div>
       </section>
-
-      {/* Reviews */}
       <section className="mt-12">
         <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center">What Users Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -196,8 +154,6 @@ export default function Home() {
           </Card>
         </div>
       </section>
-
-      {/* Footer */}
       <footer className="mt-12 py-6 bg-dark-gray text-center text-light-gray">
         <div className="flex justify-center gap-4 mb-4">
           <Link to="/about" className="hover:text-olive-drab">About</Link>
