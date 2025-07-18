@@ -191,7 +191,7 @@ export default function Profile() {
           <CardHeader>
             <h2 className="text-xl font-semibold text-dark-gray">Availability</h2>
           </CardHeader>
-          <CardContent className="prose text-dark-gray">
+          <CardContent className="prose text-dark-gray whitespace-pre-wrap">
             {profile.availability || 'Not specified'}
           </CardContent>
         </Card>
@@ -199,7 +199,7 @@ export default function Profile() {
           <CardHeader>
             <h2 className="text-xl font-semibold text-dark-gray">Pricing Details</h2>
           </CardHeader>
-          <CardContent className="prose text-dark-gray">
+          <CardContent className="prose text-dark-gray whitespace-pre-wrap">
             {profile.pricingDetails || 'Not specified'}
           </CardContent>
         </Card>

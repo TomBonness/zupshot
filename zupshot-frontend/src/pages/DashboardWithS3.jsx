@@ -428,7 +428,7 @@ export default function DashboardWithS3() {
                       value={formData.availability}
                       onChange={handleInputChange}
                       placeholder="Availability (e.g., Weekends only, evenings after 5pm)"
-                      className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                      className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg whitespace-pre-wrap"
                       rows="4"
                     />
                   </div>
@@ -440,7 +440,7 @@ export default function DashboardWithS3() {
                       value={formData.pricingDetails}
                       onChange={handleInputChange}
                       placeholder="Pricing Details (e.g., Basic shoot: $50, Edits included: +$20)"
-                      className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                      className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg whitespace-pre-wrap"
                       rows="4"
                     />
                   </div>
