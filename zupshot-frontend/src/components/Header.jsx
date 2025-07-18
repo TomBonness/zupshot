@@ -2,9 +2,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { listProfiles } from '@/graphql/queries';
+
+const client = generateClient();
 
 export default function Header() {
   const [user, setUser] = useState(null);
+  const [hasProfile, setHasProfile] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,8 +17,15 @@ export default function Header() {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        const response = await client.graphql({
+          query: listProfiles,
+          variables: { filter: { owner: { eq: currentUser.userId } } },
+          authMode: 'apiKey',
+        });
+        const profiles = response.data.listProfiles.items;
+        setHasProfile(profiles.length > 0);
       } catch (err) {
-        console.error('No user logged in:', err);
+        console.error('No user logged in or error fetching profile:', err);
       }
     };
     fetchUser();
@@ -36,7 +48,7 @@ export default function Header() {
           className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
           onClick={() => navigate(user ? '/dashboard' : '/signup')}
         >
-          Post Your Profile
+          {hasProfile ? 'Edit Your Profile' : 'Post Your Profile'}
         </Button>
         {!user && (
           <>
