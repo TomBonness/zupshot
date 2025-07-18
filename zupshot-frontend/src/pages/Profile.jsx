@@ -5,11 +5,14 @@ import { generateClient } from 'aws-amplify/api';
 import { getProfile, listFeedbacks } from '@/graphql/queries';
 import { createFeedback } from '@/graphql/mutations';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import toast from 'react-hot-toast';
 import Header from '@/components/Header';
 
@@ -40,7 +43,7 @@ export default function Profile() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState('');
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -112,7 +115,8 @@ export default function Profile() {
       navigate('/signin');
       return;
     }
-    if (rating < 1 || rating > 5) {
+    const ratingValue = parseInt(rating);
+    if (isNaN(ratingValue) || ratingValue < 1 || ratingValue > 5) {
       setError('Rating must be between 1 and 5');
       toast.error('Rating must be between 1 and 5');
       return;
@@ -121,11 +125,11 @@ export default function Profile() {
       await client.graphql({
         query: createFeedback,
         variables: {
-          input: { rating, comment, profileId: id, owner: user.userId },
+          input: { rating: ratingValue, comment, profileId: id, owner: user.userId },
         },
         authMode: 'userPool',
       });
-      setRating(0);
+      setRating('');
       setComment('');
       const { data } = await client.graphql({ 
         query: listFeedbacks, 
@@ -314,45 +318,64 @@ export default function Profile() {
             </Button>
           )}
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>
-          {user ? (
-            <form onSubmit={handleFeedbackSubmit} className="grid grid-cols-1 gap-4 mb-6">
-              <input
-                type="number"
-                min="1"
-                max="5"
-                value={rating}
-                onChange={(e) => setRating(parseInt(e.target.value))}
-                placeholder="Rating (1-5)"
-                className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
-                required
-              />
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Your feedback..."
-                className="w-full p-3 border border-light-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-drab"
-                rows="4"
-              />
-              <Button type="submit" className="transition-transform duration-200 hover:scale-105">
-                Submit Feedback
-              </Button>
-            </form>
-          ) : (
-            <p className="text-sm text-soft-red mb-4">Please sign in to submit feedback.</p>
-          )}
-          {feedbacks.length > 0 ? (
-            feedbacks.map((feedback) => (
-              <div key={feedback.id} className="border-t border-light-gray pt-4 mt-4">
-                <p className="text-dark-gray"><strong>Rating:</strong> {feedback.rating}/5</p>
-                <p className="text-dark-gray">{feedback.comment}</p>
+        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-dark-gray">Feedback</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {user ? (
+              <form onSubmit={handleFeedbackSubmit} className="grid grid-cols-1 gap-4 mb-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="rating" className="text-dark-gray font-medium">Rating (1-5)</Label>
+                  <Input
+                    id="rating"
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={rating}
+                    onChange={(e) => setRating(e.target.value)}
+                    placeholder="Rating (1-5)"
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="comment" className="text-dark-gray font-medium">Your Feedback</Label>
+                  <Textarea
+                    id="comment"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Your feedback..."
+                    className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    rows="4"
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray transition-transform hover:scale-105 rounded-lg"
+                >
+                  Submit Feedback
+                </Button>
+              </form>
+            ) : (
+              <p className="text-sm text-soft-red mb-4">Please sign in to submit feedback.</p>
+            )}
+            {feedbacks.length > 0 ? (
+              <div className="space-y-4">
+                {feedbacks.map((feedback) => (
+                  <Card key={feedback.id} className="bg-white shadow-sm">
+                    <CardContent className="pt-4">
+                      <p className="text-dark-gray font-medium"><strong>Rating:</strong> {feedback.rating}/5</p>
+                      <p className="text-dark-gray">{feedback.comment || 'No comment provided'}</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            ))
-          ) : (
-            <p className="text-dark-gray">No feedback yet.</p>
-          )}
-        </div>
+            ) : (
+              <p className="text-dark-gray">No feedback yet.</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
