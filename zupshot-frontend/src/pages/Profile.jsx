@@ -3,13 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { getProfile, listFeedbacks } from '@/graphql/queries';
-import { createFeedback, deleteProfile } from '@/graphql/mutations';
+import { createFeedback } from '@/graphql/mutations';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import toast from 'react-hot-toast';
 import Header from '@/components/Header';
@@ -142,27 +141,6 @@ export default function Profile() {
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete your profile?')) {
-      try {
-        if (profile) {
-          await client.graphql({
-            query: deleteProfile,
-            variables: { input: { id: profile.id } },
-            authMode: 'userPool',
-          });
-        }
-        setProfile(null);
-        navigate('/dashboard');
-        toast.success('Profile deleted successfully!');
-      } catch (err) {
-        console.error('Error deleting profile:', err);
-        setError('Failed to delete profile: ' + err.message);
-        toast.error('Failed to delete profile');
-      }
-    }
-  };
-
   if (loading) {
     return <SkeletonProfile />;
   }
@@ -182,33 +160,12 @@ export default function Profile() {
     <div className="min-h-screen bg-light-gray">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Header />
-        <Carousel className="w-full">
-          <CarouselContent>
-            {profile.imageUrls && profile.imageUrls.length > 0 ? (
-              profile.imageUrls.map((url, index) => (
-                <CarouselItem key={index}>
-                  <img
-                    src={url || 'https://via.placeholder.com/128'}
-                    alt={`${profile.name} ${index + 1}`}
-                    className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
-                    loading="lazy"
-                  />
-                </CarouselItem>
-              ))
-            ) : (
-              <CarouselItem>
-                <img
-                  src="https://via.placeholder.com/128"
-                  alt="Placeholder"
-                  className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
-                  loading="lazy"
-                />
-              </CarouselItem>
-            )}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        <img
+          src={profile.imageUrls?.[0] || 'https://via.placeholder.com/128'}
+          alt={`${profile.name} Profile`}
+          className="w-full h-[300px] md:h-[500px] object-cover rounded-lg shadow-md"
+          loading="lazy"
+        />
         <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-col md:flex-row items-center gap-4">
             <Avatar className="w-32 h-32">
@@ -272,15 +229,15 @@ export default function Profile() {
             )}
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
+            <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+              <DialogHeader className="p-4">
                 <DialogTitle>Portfolio Image</DialogTitle>
               </DialogHeader>
               {selectedImage && (
                 <img
                   src={selectedImage}
                   alt="Selected Portfolio"
-                  className="w-full h-auto max-h-[80vh] object-contain"
+                  className="w-full max-w-[90vw] max-h-[80vh] object-contain"
                 />
               )}
             </DialogContent>
@@ -348,20 +305,6 @@ export default function Profile() {
             </a>
           </Button>
         </div>
-        {user && user.userId === profile.owner && (
-          <div className="flex gap-4">
-            <Button onClick={() => navigate('/dashboard')}>
-              Edit Profile
-            </Button>
-            <Button
-              variant="destructive"
-              className="hover:bg-soft-red hover:text-white"
-              onClick={handleDelete}
-            >
-              Delete Profile
-            </Button>
-          </div>
-        )}
         <div>
           <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>
           {user ? (
