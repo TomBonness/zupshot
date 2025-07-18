@@ -292,18 +292,27 @@ export default function Profile() {
               </Tooltip>
             </TooltipProvider>
           )}
-          <Button
-            className="bg-olive-drab hover:bg-tan-yellow text-white hover:text-dark-gray"
-            asChild
-          >
-            <a
-              href={`mailto:${profile.email || 'contact@zupshot.com'}?subject=Interested in a photoshoot via Zupshot`}
-              target="_blank"
-              rel="noopener noreferrer"
+          {profile.email ? (
+            <Button
+              className="bg-olive-drab hover:bg-tan-yellow text-white hover:text-dark-gray"
+              asChild
+            >
+              <a
+                href={`mailto:${profile.email}?subject=Interested in a photoshoot via Zupshot`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Contact Me
+              </a>
+            </Button>
+          ) : (
+            <Button
+              className="bg-olive-drab hover:bg-tan-yellow text-white hover:text-dark-gray"
+              disabled
             >
               Contact Me
-            </a>
-          </Button>
+            </Button>
+          )}
         </div>
         <div>
           <h2 className="text-xl font-semibold text-dark-gray mb-4">Feedback</h2>

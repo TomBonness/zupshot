@@ -84,6 +84,7 @@ export default function DashboardWithS3() {
     pricingDetails: '',
     instagram: '',
     website: '',
+    email: '',
   });
   const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -129,6 +130,7 @@ export default function DashboardWithS3() {
             pricingDetails: userProfile.pricingDetails || '',
             instagram: userProfile.instagram || '',
             website: userProfile.website || '',
+            email: userProfile.email || '',
           });
         }
       } catch (err) {
@@ -211,6 +213,7 @@ export default function DashboardWithS3() {
               pricingDetails: formData.pricingDetails,
               instagram: formData.instagram,
               website: formData.website,
+              email: formData.email,
             },
           },
           authMode: 'userPool',
@@ -231,6 +234,7 @@ export default function DashboardWithS3() {
               pricingDetails: formData.pricingDetails,
               instagram: formData.instagram,
               website: formData.website,
+              email: formData.email,
               owner: user.userId,
             },
           },
@@ -282,7 +286,8 @@ export default function DashboardWithS3() {
           availability: '', 
           pricingDetails: '', 
           instagram: '', 
-          website: '' 
+          website: '', 
+          email: '',
         });
         toast.success('Profile and associated images deleted successfully!');
       } catch (err) {
@@ -547,6 +552,18 @@ export default function DashboardWithS3() {
                       className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
                     />
                   </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="email" className="text-dark-gray font-medium">Contact Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Your contact email"
+                      className="border-light-gray focus:ring-olive-drab hover:border-tan-yellow transition-colors rounded-lg"
+                    />
+                  </div>
                   <div className="flex gap-4 justify-center">
                     <motion.div
                       animate={isSubmitting ? { scale: [1, 1.1, 1] } : { scale: 1 }}
@@ -577,16 +594,13 @@ export default function DashboardWithS3() {
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
               <DialogHeader>
-                <CardTitle>Image Preview</CardTitle>
+                <DialogTitle>Image Preview</DialogTitle>
               </DialogHeader>
               {selectedImage && (
-                <motion.img
+                <img
                   src={selectedImage}
                   alt="Selected Image"
                   className="w-full max-w-full max-h-[80vh] object-contain"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
                 />
               )}
             </DialogContent>

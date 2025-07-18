@@ -15,6 +15,7 @@ export const getProfile = /* GraphQL */ `
       pricingDetails
       instagram
       website
+      email
       owner
       createdAt
       updatedAt
@@ -41,6 +42,7 @@ export const listProfiles = /* GraphQL */ `
         pricingDetails
         instagram
         website
+        email
         owner
         createdAt
         updatedAt

@@ -15,6 +15,7 @@ export const onCreateProfile = /* GraphQL */ `
       pricingDetails
       instagram
       website
+      email
       owner
       createdAt
       updatedAt
@@ -36,6 +37,7 @@ export const onUpdateProfile = /* GraphQL */ `
       pricingDetails
       instagram
       website
+      email
       owner
       createdAt
       updatedAt
@@ -57,6 +59,7 @@ export const onDeleteProfile = /* GraphQL */ `
       pricingDetails
       instagram
       website
+      email
       owner
       createdAt
       updatedAt
