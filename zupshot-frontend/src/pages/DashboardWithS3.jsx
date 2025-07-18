@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { uploadData, getUrl, remove } from 'aws-amplify/storage';
+import { uploadData, remove } from 'aws-amplify/storage';
 import { generateClient } from 'aws-amplify/api';
 import { createProfile, updateProfile, deleteProfile } from '@/graphql/mutations';
 import { listProfiles } from '@/graphql/queries';
@@ -91,6 +91,10 @@ export default function DashboardWithS3() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  // Fallback bucket and region
+  const S3_BUCKET = import.meta.env.VITE_S3_BUCKET || 'zupshotbucketae993-dev';
+  const AWS_REGION = import.meta.env.VITE_AWS_REGION || 'us-east-1';
+
   useEffect(() => {
     const fetchUserAndProfile = async () => {
       try {
@@ -144,14 +148,15 @@ export default function DashboardWithS3() {
     try {
       const newUrls = [];
       for (const file of acceptedFiles) {
-        const key = `private/${user?.userId}/${field}/${encodeURIComponent(file.name)}`;
+        const key = `public/${user?.userId}/${field}/${encodeURIComponent(file.name)}`;
         await uploadData({
           path: key,
           data: file,
-          options: { contentType: file.type, accessLevel: 'private' },
+          options: { contentType: file.type, accessLevel: 'public' },
         }).result;
-        const { url } = await getUrl({ path: key, options: { accessLevel: 'private' } });
-        newUrls.push(url.toString());
+        // Construct public S3 URL
+        const url = `https://${S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${key}`;
+        newUrls.push(url);
       }
       setFormData({ ...formData, [field]: [...formData[field], ...newUrls] });
       toast.success(`${newUrls.length} ${field} uploaded successfully!`);
@@ -173,8 +178,8 @@ export default function DashboardWithS3() {
     try {
       const updatedImages = [...formData[field]];
       const url = updatedImages[index];
-      const key = `private/${user?.userId}/${field}/${decodeURIComponent(url.split('/').pop())}`;
-      await remove({ path: key, options: { accessLevel: 'private' } });
+      const key = `public/${user?.userId}/${field}/${decodeURIComponent(url.split('/').pop().split('?')[0])}`;
+      await remove({ path: key, options: { accessLevel: 'public' } });
       console.log(`Deleted S3 object: ${key}`);
       updatedImages.splice(index, 1);
       setFormData({ ...formData, [field]: updatedImages });
@@ -251,9 +256,9 @@ export default function DashboardWithS3() {
           // Delete images from S3
           for (const url of [...profile.imageUrls, ...profile.portfolioImages]) {
             const field = url.includes('imageUrls') ? 'imageUrls' : 'portfolioImages';
-            const key = `private/${user?.userId}/${field}/${decodeURIComponent(url.split('/').pop())}`;
+            const key = `public/${user?.userId}/${field}/${decodeURIComponent(url.split('/').pop().split('?')[0])}`;
             try {
-              await remove({ path: key, options: { accessLevel: 'private' } });
+              await remove({ path: key, options: { accessLevel: 'public' } });
               console.log(`Deleted S3 object: ${key}`);
             } catch (err) {
               console.error(`Error deleting S3 object ${key}:`, err);
@@ -572,7 +577,7 @@ export default function DashboardWithS3() {
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Image Preview</DialogTitle>
+                <CardTitle>Image Preview</CardTitle>
               </DialogHeader>
               {selectedImage && (
                 <motion.img
