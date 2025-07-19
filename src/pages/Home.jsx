@@ -17,6 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
+  const [hasProfile, setHasProfile] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,8 +25,16 @@ export default function Home() {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        if (currentUser) {
+          const response = await client.graphql({
+            query: listProfiles,
+            variables: { filter: { owner: { eq: currentUser.userId } } },
+            authMode: 'apiKey',
+          });
+          setHasProfile(response.data.listProfiles.items.length > 0);
+        }
       } catch (err) {
-        console.log('No user logged in:', err);
+        console.log('No user logged in or error fetching profile:', err);
       }
       try {
         setLoading(true);
@@ -73,9 +82,11 @@ export default function Home() {
             <Button
               variant="outline"
               className="border-olive-drab text-olive-drab hover:bg-tan-yellow hover:text-dark-gray px-6 py-3 rounded-lg transition-transform hover:scale-105"
-              onClick={() => navigate(user ? '/dashboard' : '/signup')}
+              asChild
             >
-              Post Your Profile
+              <Link to={user && hasProfile ? '/dashboard' : '/signin'} onClick={() => navigate(user && hasProfile ? '/dashboard' : '/signin')}>
+                Post Your Profile
+              </Link>
             </Button>
           </div>
         </section>
@@ -181,7 +192,7 @@ export default function Home() {
           <p className="text-lg mb-6 text-center max-w-md">Zupshot is a fresh startup connecting aspiring photographers with clients. Post your profile to showcase your skills and join our growing community!</p>
           <Button 
             className="bg-tan-yellow text-dark-gray hover:bg-soft-red hover:text-white px-6 py-3 animate-pulse rounded-lg"
-            onClick={() => navigate(user ? '/dashboard' : '/signup')}
+            onClick={() => navigate(user && hasProfile ? '/dashboard' : '/signin')}
           >
             Post Your Profile
           </Button>
