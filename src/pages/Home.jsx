@@ -177,7 +177,7 @@ export default function Home() {
               d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
             ></path>
           </svg>
-          <h2 className="text-3xl font-bold mb-4 text-tan-yellow">Join Our New Photography Community!</h2>
+          <h2 className="text-3xl font-bold mb-4 text-tan-yellow text-center">Join Our New Photography Community!</h2>
           <p className="text-lg mb-6 text-center max-w-md">Zupshot is a fresh startup connecting aspiring photographers with clients. Post your profile to showcase your skills and join our growing community!</p>
           <Button 
             className="bg-tan-yellow text-dark-gray hover:bg-soft-red hover:text-white px-6 py-3 animate-pulse rounded-lg"
