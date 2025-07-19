@@ -32,11 +32,11 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="flex justify-between items-center py-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <Link to="/">
-        <h1 className="text-2xl font-bold text-olive-drab">Zupshot</h1>
+    <header className="flex justify-between items-center py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-light-gray">
+      <Link to="/" className="text-2xl font-bold text-olive-drab hover:text-tan-yellow transition-colors">
+        Zupshot
       </Link>
-      <div className="flex gap-4">
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
@@ -54,7 +54,7 @@ export default function Header() {
           <>
             <Button
               variant="outline"
-              className="border-olive-drab text-olive-drab hover:bg-tan-yellow"
+              className="border-olive-drab text-olive-drab hover:bg-tan-yellow sm:block hidden"
               asChild
             >
               <Link to="/signin">Sign In</Link>
