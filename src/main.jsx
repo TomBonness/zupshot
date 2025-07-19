@@ -14,8 +14,7 @@ import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import Listings from './pages/Listings';
 import Profile from './pages/Profile';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
+import SignInSignUp from './pages/SignInSignUp';
 import DashboardWithS3 from './pages/DashboardWithS3';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -26,8 +25,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Home />} />
         <Route path="/listings" element={<Listings />} />
         <Route path="/profile/:id" element={<Profile />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signin" element={<SignInSignUp />} />
         <Route path="/dashboard" element={<DashboardWithS3 />} />
       </Routes>
     </BrowserRouter>

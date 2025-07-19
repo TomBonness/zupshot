@@ -44,28 +44,20 @@ export default function Header() {
         >
           <Link to="/listings">Browse Listings</Link>
         </Button>
-        <Button
-          className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
-          onClick={() => navigate(user ? '/dashboard' : '/signup')}
-        >
-          {hasProfile ? 'Edit Your Profile' : 'Post Your Profile'}
-        </Button>
-        {!user && (
-          <>
-            <Button
-              variant="outline"
-              className="border-olive-drab text-olive-drab hover:bg-tan-yellow sm:block hidden"
-              asChild
-            >
-              <Link to="/signin">Sign In</Link>
-            </Button>
-            <Button
-              className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
-              asChild
-            >
-              <Link to="/signup">Sign Up</Link>
-            </Button>
-          </>
+        {user ? (
+          <Button
+            className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
+            onClick={() => navigate('/dashboard')}
+          >
+            {hasProfile ? 'Edit Your Profile' : 'Post Your Profile'}
+          </Button>
+        ) : (
+          <Button
+            className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray"
+            asChild
+          >
+            <Link to="/signin">Sign In</Link>
+          </Button>
         )}
       </div>
     </header>
