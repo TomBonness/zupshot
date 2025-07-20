@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { listProfiles } from '@/graphql/queries';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Skeleton } from '@/components/ui/skeleton';
 import toast from 'react-hot-toast';
 import Header from '@/components/Header';
+import { useAuth } from '@/hooks/useAuth';
 
 const client = generateClient();
 
@@ -16,26 +16,11 @@ export default function Home() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [user, setUser] = useState(null);
-  const [hasProfile, setHasProfile] = useState(false);
+  const { user, hasProfile } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserAndProfiles = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-        if (currentUser) {
-          const response = await client.graphql({
-            query: listProfiles,
-            variables: { filter: { owner: { eq: currentUser.userId } } },
-            authMode: 'apiKey',
-          });
-          setHasProfile(response.data.listProfiles.items.length > 0);
-        }
-      } catch (err) {
-        console.log('No user logged in or error fetching profile:', err);
-      }
+    const fetchProfiles = async () => {
       try {
         setLoading(true);
         const response = await client.graphql({
@@ -58,7 +43,7 @@ export default function Home() {
         setLoading(false);
       }
     };
-    fetchUserAndProfiles();
+    fetchProfiles();
   }, []);
 
   return (

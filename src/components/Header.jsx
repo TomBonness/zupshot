@@ -1,41 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser } from 'aws-amplify/auth';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
-import { generateClient } from 'aws-amplify/api';
-import { listProfiles } from '@/graphql/queries';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-
-const client = generateClient();
+import { useAuth } from '@/hooks/useAuth';
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
 
 export default function Header() {
-  const [user, setUser] = useState(null);
-  const [hasProfile, setHasProfile] = useState(false);
+  const { user, hasProfile, loading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-        const response = await client.graphql({
-          query: listProfiles,
-          variables: { filter: { owner: { eq: currentUser.userId } } },
-          authMode: 'apiKey',
-        });
-        const profiles = response.data.listProfiles.items;
-        setHasProfile(profiles.length > 0);
-      } catch (err) {
-        console.error('No user logged in or error fetching profile:', err);
-      }
-    };
-    fetchUser();
-  }, []);
+  if (loading) return null;
 
   return (
     <header className="flex justify-between items-center py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-light-gray">
