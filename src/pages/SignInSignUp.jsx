@@ -13,7 +13,7 @@ export default function SignInSignUp() {
   const [formData, setFormData] = useState({ email: '', password: '', verificationCode: '' });
   const [isVerifying, setIsVerifying] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -25,12 +25,13 @@ export default function SignInSignUp() {
     e.preventDefault();
     try {
       await signIn({ username: formData.email, password: formData.password });
-      toast.success('Signed in successfully!');
+      toast.success('Successfully signed in!');
       navigate('/dashboard');
     } catch (err) {
-      console.error('Error signing in:', err);
-      setError('Failed to sign in: ' + err.message);
-      toast.error('Failed to sign in');
+      console.error('Sign-in error:', err);
+      const message = err.message || 'Sign-in failed. Check your credentials or try again.';
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -46,9 +47,10 @@ export default function SignInSignUp() {
       setActiveTab('signup');
       toast.success('Verification code sent to your email!');
     } catch (err) {
-      console.error('Error signing up:', err);
-      setError('Failed to sign up: ' + err.message);
-      toast.error('Failed to sign up');
+      console.error('Sign-up error:', err);
+      const message = err.message || 'Sign-up failed. Please try again.';
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -59,9 +61,10 @@ export default function SignInSignUp() {
       toast.success('Email verified successfully!');
       navigate('/signin');
     } catch (err) {
-      console.error('Error confirming sign up:', err);
-      setError('Failed to verify email: ' + err.message);
-      toast.error('Failed to verify email');
+      console.error('Verification error:', err);
+      const message = err.message || 'Verification failed. Check your code or resend it.';
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -70,9 +73,10 @@ export default function SignInSignUp() {
       await resendSignUpCode({ username: formData.email });
       toast.success('Verification code resent!');
     } catch (err) {
-      console.error('Error resending code:', err);
-      setError('Failed to resend code: ' + err.message);
-      toast.error('Failed to resend code');
+      console.error('Resend code error:', err);
+      const message = err.message || 'Failed to resend code. Try again later.';
+      setError(message);
+      toast.error(message);
     }
   };
 

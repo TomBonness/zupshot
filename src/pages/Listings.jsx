@@ -16,7 +16,7 @@ const client = generateClient();
 export default function Listings() {
   const [profiles, setProfiles] = useState([]);
   const [filteredProfiles, setFilteredProfiles] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [priceFilter, setPriceFilter] = useState('');
@@ -26,13 +26,16 @@ export default function Listings() {
     const fetchProfiles = async () => {
       try {
         setLoading(true);
-        const { data } = await client.graphql({ query: listProfiles, authMode: 'apiKey' });
-        setProfiles(data.listProfiles.items);
-        setFilteredProfiles(data.listProfiles.items);
+        const response = await client.graphql({ query: listProfiles, authMode: 'apiKey' });
+        if (response.errors) {
+          throw new Error('Failed to load photographer listings due to server issues.');
+        }
+        setProfiles(response.data.listProfiles.items || []);
+        setFilteredProfiles(response.data.listProfiles.items || []);
       } catch (err) {
         console.error('Error fetching profiles:', err);
-        setError('Failed to load profiles');
-        toast.error('Failed to load profiles');
+        setError(err.message);
+        toast.error(err.message || 'Failed to load listings. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -82,7 +85,7 @@ export default function Listings() {
           <Button className="bg-olive-drab text-white hover:bg-tan-yellow hover:text-dark-gray">Apply</Button>
         </div>
         <h2 className="text-3xl font-bold text-dark-gray mb-6 text-center mt-6">Photographer Listings</h2>
-        {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
+        {error && <p className="text-sm text-soft-red mb-4 text-center">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {loading ? (
             [...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 rounded-lg bg-white animate-pulse" />)

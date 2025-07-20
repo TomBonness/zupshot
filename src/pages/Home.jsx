@@ -15,7 +15,7 @@ const client = generateClient();
 export default function Home() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const { user, hasProfile } = useAuth();
   const navigate = useNavigate();
 
@@ -28,17 +28,14 @@ export default function Home() {
           variables: { limit: 4 },
           authMode: 'apiKey',
         });
-        console.log('GraphQL Response:', response);
         if (response.errors) {
-          console.log('GraphQL errors:', response.errors);
-          setError('Failed to load featured photographers');
-          return;
+          throw new Error('Failed to fetch featured photographers due to server issues.');
         }
-        setProfiles(response.data.listProfiles.items);
+        setProfiles(response.data.listProfiles.items || []);
       } catch (err) {
         console.error('Error fetching profiles:', err);
-        setError('Failed to load featured photographers');
-        toast.error('Failed to load featured photographers');
+        setError(err.message);
+        toast.error(err.message || 'Failed to load featured photographers. Please try again later.');
       } finally {
         setLoading(false);
       }

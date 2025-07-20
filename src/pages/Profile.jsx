@@ -42,7 +42,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [feedbacks, setFeedbacks] = useState([]);
   const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [rating, setRating] = useState('');
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(true);
@@ -61,28 +61,20 @@ export default function Profile() {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
       } catch (err) {
-        console.log('No user logged in:', err);
+        console.error('No user logged in:', err);
       }
       try {
         setLoading(true);
-        console.log('Fetching profile with ID:', id);
         const response = await client.graphql({ 
           query: getProfile, 
           variables: { id }, 
           authMode: 'apiKey' 
         });
-        console.log('getProfile Response:', response);
         if (response.errors) {
-          console.log('getProfile errors:', response.errors);
-          setError('Failed to load profile');
-          setLoading(false);
-          return;
+          throw new Error('Failed to load profile due to server issues.');
         }
         if (!response.data.getProfile) {
-          console.log('Profile not found for ID:', id);
-          setError('Profile not found');
-          setLoading(false);
-          return;
+          throw new Error('Profile not found.');
         }
         setProfile(response.data.getProfile);
         const feedbackResponse = await client.graphql({ 
@@ -90,17 +82,14 @@ export default function Profile() {
           variables: { filter: { profileId: { eq: id } } }, 
           authMode: 'apiKey' 
         });
-        console.log('listFeedbacks Response:', feedbackResponse);
         if (feedbackResponse.errors) {
-          console.log('listFeedbacks errors:', feedbackResponse.errors);
-          setError('Failed to load feedback');
-          setLoading(false);
-          return;
+          throw new Error('Failed to load feedback due to server issues.');
         }
-        setFeedbacks(feedbackResponse.data.listFeedbacks.items);
+        setFeedbacks(feedbackResponse.data.listFeedbacks.items || []);
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError('Failed to load profile or feedback');
+        setError(err.message);
+        toast.error(err.message || 'Failed to load profile or feedback. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -136,12 +125,12 @@ export default function Profile() {
         variables: { filter: { profileId: { eq: id } } }, 
         authMode: 'apiKey' 
       });
-      setFeedbacks(data.listFeedbacks.items);
+      setFeedbacks(data.listFeedbacks.items || []);
       toast.success('Feedback submitted successfully!');
     } catch (err) {
       console.error('Error submitting feedback:', err);
       setError('Failed to submit feedback: ' + err.message);
-      toast.error('Failed to submit feedback');
+      toast.error('Failed to submit feedback. Please try again.');
     }
   };
 
@@ -376,6 +365,7 @@ export default function Profile() {
             )}
           </CardContent>
         </Card>
+        {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
       </div>
     </div>
   );

@@ -86,7 +86,7 @@ export default function DashboardWithS3() {
     website: '',
     email: '',
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,21 +100,17 @@ export default function DashboardWithS3() {
     const fetchUserAndProfile = async () => {
       try {
         const currentUser = await getCurrentUser();
-        console.log('Current User:', currentUser);
+        setUser(currentUser);
         const session = await fetchAuthSession();
-        console.log('Session:', session);
         setUser(currentUser);
         const response = await client.graphql({
           query: listProfiles,
           variables: { filter: { owner: { eq: currentUser.userId } } },
           authMode: 'apiKey',
         });
-        console.log('GraphQL Response:', response);
         const { data, errors } = response;
         if (errors) {
-          console.log('GraphQL errors:', errors);
-          setError('Failed to fetch profile data');
-          return;
+          throw new Error('Failed to fetch profile data due to server issues.');
         }
         const userProfile = data.listProfiles.items[0];
         if (userProfile) {
@@ -135,6 +131,7 @@ export default function DashboardWithS3() {
         }
       } catch (err) {
         console.error('Error fetching user or profile:', err);
+        setError(err.message);
         navigate('/signin');
       }
     };
@@ -164,8 +161,8 @@ export default function DashboardWithS3() {
       toast.success(`${newUrls.length} ${field} uploaded successfully!`);
     } catch (err) {
       console.error('S3 upload error:', err);
-      setError(`Failed to upload ${field}: ` + err.message);
-      toast.error(`Failed to upload ${field}`);
+      setError(`Failed to upload ${field}: ${err.message}`);
+      toast.error(`Failed to upload ${field}. Please try again.`);
     }
   };
 
@@ -182,14 +179,13 @@ export default function DashboardWithS3() {
       const url = updatedImages[index];
       const key = `public/${user?.userId}/${field}/${decodeURIComponent(url.split('/').pop().split('?')[0])}`;
       await remove({ path: key, options: { accessLevel: 'public' } });
-      console.log(`Deleted S3 object: ${key}`);
       updatedImages.splice(index, 1);
       setFormData({ ...formData, [field]: updatedImages });
       toast.success('Image deleted successfully!');
     } catch (err) {
       console.error(`Error deleting S3 object:`, err);
-      setError('Failed to delete image: ' + err.message);
-      toast.error('Failed to delete image');
+      setError(`Failed to delete image: ${err.message}`);
+      toast.error(`Failed to delete image. Please try again.`);
     }
   };
 
@@ -240,14 +236,13 @@ export default function DashboardWithS3() {
           },
           authMode: 'userPool',
         });
-        console.log('Created Profile ID:', response.data.createProfile.id);
         setProfile({ ...formData, id: response.data.createProfile.id });
         toast.success('Profile created successfully!');
       }
     } catch (err) {
       console.error('Error saving profile:', err);
       setError('Failed to save profile: ' + err.message);
-      toast.error('Failed to save profile');
+      toast.error('Failed to save profile. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -263,7 +258,6 @@ export default function DashboardWithS3() {
             const key = `public/${user?.userId}/${field}/${decodeURIComponent(url.split('/').pop().split('?')[0])}`;
             try {
               await remove({ path: key, options: { accessLevel: 'public' } });
-              console.log(`Deleted S3 object: ${key}`);
             } catch (err) {
               console.error(`Error deleting S3 object ${key}:`, err);
             }
@@ -293,7 +287,7 @@ export default function DashboardWithS3() {
       } catch (err) {
         console.error('Error deleting profile:', err);
         setError('Failed to delete profile: ' + err.message);
-        toast.error('Failed to delete profile');
+        toast.error('Failed to delete profile. Please try again.');
       }
     }
   };
@@ -370,6 +364,7 @@ export default function DashboardWithS3() {
                 <p className="text-sm text-dark-gray">Build your photographer profile to connect with clients.</p>
               </CardHeader>
               <CardContent>
+                {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="text-dark-gray font-medium">Name</Label>
@@ -566,7 +561,7 @@ export default function DashboardWithS3() {
                   </div>
                   <div className="flex gap-4 justify-center">
                     <motion.div
-                      animate={isSubmitting ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                      animate={isSubmitting ? { scale: [1, 1.1, 1] } : { scale: 1}}
                       transition={{ duration: 0.5, repeat: isSubmitting ? Infinity : 0 }}
                     >
                       <Button 
@@ -605,6 +600,7 @@ export default function DashboardWithS3() {
               )}
             </DialogContent>
           </Dialog>
+          {error && <p className="text-sm text-soft-red mb-4">{error}</p>}
         </div>
       </div>
     </DndProvider>
