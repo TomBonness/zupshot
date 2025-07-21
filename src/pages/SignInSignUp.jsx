@@ -34,7 +34,8 @@ export default function SignInSignUp() {
       toast.error(message);
     }
   };
-
+// TODO: Add password strength validation in real time as they type in the password
+// TODO: have them type in the pasaword twice and make sure they match
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {

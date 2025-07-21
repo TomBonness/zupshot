@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
 
+// TODO: Add a logo animation or use better typography for the logo to make it more fun
+
 export default function Header() {
   const { user, hasProfile, loading } = useAuth();
   const navigate = useNavigate();

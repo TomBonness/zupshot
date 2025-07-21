@@ -13,6 +13,8 @@ import Header from '@/components/Header';
 
 const client = generateClient();
 
+// TODO: Implement listing order based on engagement? or profile rating?
+
 export default function Listings() {
   const [profiles, setProfiles] = useState([]);
   const [filteredProfiles, setFilteredProfiles] = useState([]);

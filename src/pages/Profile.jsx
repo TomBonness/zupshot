@@ -37,6 +37,10 @@ const SkeletonProfile = () => (
   </div>
 );
 
+// TODO: Add a button to share profile and maybe integrate it with like instagram in some way?
+// TODO: Add username or subject line for the feedback section
+// TODO: Give user the ability to delete comments they dont like? maybe?
+
 export default function Profile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
@@ -97,6 +101,7 @@ export default function Profile() {
     fetchUserAndData();
   }, [id, navigate]);
 
+  // TODO: Replace number input with star rating because this is horrible
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!user) {

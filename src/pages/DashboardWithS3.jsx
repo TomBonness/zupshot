@@ -143,6 +143,7 @@ export default function DashboardWithS3() {
     setFormData({ ...formData, [name]: value });
   };
 
+  // TODO: convert images uploaded to a fixed size like 5MB max
   const uploadImages = async (acceptedFiles, field) => {
     try {
       const newUrls = [];
@@ -308,7 +309,7 @@ export default function DashboardWithS3() {
   if (!user) {
     return null;
   }
-
+  // TODO: Add some type of loading indicator while the photos are uploading
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen bg-light-gray">

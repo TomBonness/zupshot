@@ -12,6 +12,9 @@ import { useAuth } from '@/hooks/useAuth';
 
 const client = generateClient();
 
+// TODO: add animations during page like there is in the dashboard for better ux
+// TODO: maybe change around the on hover effects
+
 export default function Home() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +22,7 @@ export default function Home() {
   const { user, hasProfile } = useAuth();
   const navigate = useNavigate();
 
+  // TODO: Add category filters for different types of photographers ie portrait landscape video etc
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
